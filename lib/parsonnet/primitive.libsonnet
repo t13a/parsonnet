@@ -1,17 +1,5 @@
 {
-  fail(err)::
-    function(state)
-      state
-      .result
-      .failure(err),
-
-  return(out)::
-    function(state)
-      state
-      .result
-      .success(out),
-
-  token(
+  item(
     nextPosFunc,
     getTokenFunc,
     testTokenFunc,
@@ -41,4 +29,16 @@
         .consume(nextPosFunc(state.input.src, state.input.pos, null))
         .result
         .failure('token not found at %s' % formatPosFunc(state.input.pos)),
+
+  result(out)::
+    function(state)
+      state
+      .result
+      .success(out),
+
+  zero(err)::
+    function(state)
+      state
+      .result
+      .failure(err),
 }
