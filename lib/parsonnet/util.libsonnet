@@ -14,35 +14,30 @@
           a;
       aux(x, []),
 
-  enum(testFunc, accumFunc, val)::
-    function(func)
-      local aux(f, t) =
-        local h = util.head(t);
-        if testFunc(h) then
-          local g = accumFunc(h);
-          if std.isFunction(g) then
-            aux(g, util.tail(t)) tailstrict
-          else
-            g
-        else
-          null;
-      aux(func, val),
+  enum(accumFunc, x)::
+    local aux(f, y) =
+      local g = f(util.head(y));
+      if std.isFunction(g) then
+        aux(g, util.tail(y)) tailstrict
+      else
+        g;
+    aux(accumFunc, x),
 
-  head(val)::
-    if val != null then
-      if std.isArray(val) then
-        if std.length(val) > 0 then
-          val[0]
+  head(x)::
+    if x != null then
+      if std.isArray(x) then
+        if std.length(x) > 0 then
+          x[0]
         else
           null
       else
-        val
+        x
     else
       null,
 
-  tail(val)::
-    if val != null && std.isArray(val) && std.length(val) > 1 then
-      val[1:std.length(val)]
+  tail(x)::
+    if x != null && std.isArray(x) && std.length(x) > 1 then
+      x[1:std.length(x)]
     else
       [],
 
@@ -59,5 +54,4 @@
       r
     else
       null,
-
 }
