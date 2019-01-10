@@ -7,9 +7,9 @@
         if y != null then
           function(z)
             if reverse then
-              aux(z, a + [y])
-            else
               aux(z, [y] + a)
+            else
+              aux(z, a + [y])
         else
           a;
       aux(x, []),

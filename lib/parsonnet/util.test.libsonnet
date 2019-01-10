@@ -3,6 +3,17 @@ local util = import 'util.libsonnet';
 local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' % [a, b];
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
+local accumTests = {
+  accumFrom0: expect(util.enum(util.accum(), []), []),
+  accumFrom1: expect(util.enum(util.accum(), [1]), [1]),
+  accumFrom2: expect(util.enum(util.accum(), [1, 2]), [1, 2]),
+  accumFrom3: expect(util.enum(util.accum(), [1, 2, 3]), [1, 2, 3]),
+  accumReverseFrom0: expect(util.enum(util.accum(true), []), []),
+  accumReverseFrom1: expect(util.enum(util.accum(true), [1]), [1]),
+  accumReverseFrom2: expect(util.enum(util.accum(true), [1, 2]), [2, 1]),
+  accumReverseFrom3: expect(util.enum(util.accum(true), [1, 2, 3]), [3, 2, 1]),
+};
+
 local enumTests = {
   local accum1(a) = a,
   local accum2(a) = function(b) [a, b],
@@ -49,6 +60,7 @@ local tailTests = {
 };
 
 {
+  accumTests: accumTests,
   enumTests: enumTests,
   headTests: headTests,
   mergeTests: mergeTests,
