@@ -5,9 +5,11 @@ local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' %
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
 local itemTests = {
-  local hasPos(src, pos) = pos != null && pos >= 0 && pos < std.length(src),
-  local nextPos(src, pos, token) = if pos != null && hasPos(src, pos + 1) then pos + 1,
-  local getToken(src, pos) = if hasPos(src, pos) then src[pos],
+  local hasPos(input, offsetPos=0) =
+    input.pos != null && input.pos + offsetPos >= 0 &&
+    input.pos + offsetPos < std.length(input.src),
+  local nextPos(input) = if hasPos(input, 1) then input.pos + 1,
+  local getToken(input) = if hasPos(input) then input.src[input.pos],
   local testTokenFunctor(char) = function(token) token == char,
   local parser(char) = primitive.item(nextPos, getToken, testTokenFunctor(char)),
 

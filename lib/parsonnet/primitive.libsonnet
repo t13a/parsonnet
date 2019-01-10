@@ -7,26 +7,26 @@
     formatPosFunc=std.toString
   )::
     function(state)
-      local token = getTokenFunc(state.input.src, state.input.pos);
+      local token = getTokenFunc(state.input);
       if token != null then
         if testTokenFunc(token) then
           state
-          .consume(nextPosFunc(state.input.src, state.input.pos, token))
+          .consume(nextPosFunc(state.input))
           .result
           .success(token)
         else
           state
-          .consume(nextPosFunc(state.input.src, state.input.pos, token))
+          .consume(nextPosFunc(state.input))
           .result
           .failure(
             "unexpected token '%s' found at %s" % [
               std.strReplace(formatTokenFunc(token), "'", "\\'"),
-              formatPosFunc(state.input.pos),
+              formatPosFunc(state.input),
             ]
           )
       else
         state
-        .consume(nextPosFunc(state.input.src, state.input.pos, null))
+        .consume(nextPosFunc(state.input))
         .result
         .failure('token not found at %s' % formatPosFunc(state.input.pos)),
 
