@@ -38,7 +38,7 @@
           )
       else
         state
-        .consume(nextPosFunc(state.input, null))
+        .consume(nextPosFunc(state.input.src, state.input.pos, null))
         .result
         .failure('token not found at %s' % formatPosFunc(state.input.pos)),
 }
