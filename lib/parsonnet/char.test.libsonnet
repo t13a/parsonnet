@@ -14,7 +14,7 @@ local anyCharTests = {
   noOutputIfEmpty: expect(char.anyChar(empty).out, null),
 };
 
-local satisfyTests = {
+local satTests = {
   local isA(token) = token == 'A',
   local isB(token) = token == 'B',
 
@@ -22,20 +22,20 @@ local satisfyTests = {
   local term = state.newState('ABC', 0).consume(null),
   local empty = state.newState('', 0),
 
-  outputIfMathced: expect(char.satisfy(isA)(init).out, 'A'),
-  noOutputIfNotMatched: expect(char.satisfy(isB)(init).out, null),
-  noOutputAtTerm: expect(char.satisfy(isA)(term).out, null),
-  noOutputAtEmpty: expect(char.satisfy(isA)(empty).out, null),
+  outputIfMathced: expect(char.sat(isA)(init).out, 'A'),
+  noOutputIfNotMatched: expect(char.sat(isB)(init).out, null),
+  noOutputAtTerm: expect(char.sat(isA)(term).out, null),
+  noOutputAtEmpty: expect(char.sat(isA)(empty).out, null),
 
-  noErrorIfMatched: expect(char.satisfy(isA)(init).err, null),
-  errorIfNotMatched: expectNot(char.satisfy(isB)(init).err, null),
-  errorAtTerm: expectNot(char.satisfy(isA)(term).err, null),
-  errorAtEmpty: expectNot(char.satisfy(isA)(empty).err, null),
+  noErrorIfMatched: expect(char.sat(isA)(init).err, null),
+  errorIfNotMatched: expectNot(char.sat(isB)(init).err, null),
+  errorAtTerm: expectNot(char.sat(isA)(term).err, null),
+  errorAtEmpty: expectNot(char.sat(isA)(empty).err, null),
 
-  consumptionIfMatched: expect(char.satisfy(isA)(init).state().input.pos, 1),
-  consumptionIfNotMatched: expect(char.satisfy(isB)(init).state().input.pos, 1),
-  noConsumptionAtTerm: expect(char.satisfy(isA)(term).state().input.pos, term.input.pos),
-  consumptionAtEmpty: expectNot(char.satisfy(isA)(empty).state().input.pos, empty.input.pos),
+  consumptionIfMatched: expect(char.sat(isA)(init).state().input.pos, 1),
+  consumptionIfNotMatched: expect(char.sat(isB)(init).state().input.pos, 1),
+  noConsumptionAtTerm: expect(char.sat(isA)(term).state().input.pos, term.input.pos),
+  consumptionAtEmpty: expectNot(char.sat(isA)(empty).state().input.pos, empty.input.pos),
 };
 
 local stringTests = {
@@ -61,6 +61,6 @@ local stringTests = {
 
 {
   anyCharTests: anyCharTests,
-  satisfyTests: satisfyTests,
+  satTests: satTests,
   stringTests: stringTests,
 }

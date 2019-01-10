@@ -19,14 +19,14 @@ local primitive = import 'primitive.libsonnet';
     input.pos + offsetPos < std.length(input.src),
 
   anyChar::
-    self.satisfy(function(token) true),
+    self.sat(function(token) true),
 
   char(char)::
     assert std.isString(char) : 'char must be a string, got %s' % std.type(char);
     assert std.length(char) == 1 : 'char length must be equal to 1, got %d' % std.length(char);
-    self.satisfy(function(token) token == char),
+    self.sat(function(token) token == char),
 
-  satisfy(testTokenFunc)::
+  sat(testTokenFunc)::
     local nextPos(input) = nextPosWithOffsetPos(input, 1);
     local getToken(input) = getTokenWithLength(input, 1);
     primitive.item(nextPos, getToken, testTokenFunc),
