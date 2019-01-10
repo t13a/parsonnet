@@ -1,8 +1,10 @@
 {
+  local any(x) = true,
+
   item(
     nextPosFunc,
     getTokenFunc,
-    testTokenFunc,
+    testTokenFunc=any,
     formatTokenFunc=std.toString,
     formatPosFunc=std.toString
   )::
