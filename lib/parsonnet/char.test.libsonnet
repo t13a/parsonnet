@@ -4,6 +4,16 @@ local state = import 'state.libsonnet';
 local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' % [a, b];
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
+local anyCharTests = {
+  local init = state.newState('ABC', 0),
+  local term = state.newState('ABC', 0).consume(null),
+  local empty = state.newState('', 0),
+
+  outputAtInit: expect(char.anyChar(init).out, 'A'),
+  noOutputAtTerm: expect(char.anyChar(term).out, null),
+  noOutputIfEmpty: expect(char.anyChar(empty).out, null),
+};
+
 local satisfyTests = {
   local isA(token) = token == 'A',
   local isB(token) = token == 'B',
@@ -50,6 +60,7 @@ local stringTests = {
 };
 
 {
+  anyCharTests: anyCharTests,
   satisfyTests: satisfyTests,
   stringTests: stringTests,
 }
