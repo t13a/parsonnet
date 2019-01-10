@@ -33,7 +33,11 @@
         state():: state,
       },
 
-      consume(pos):: self { input+: { pos: pos } },
+      consume(pos)::
+        if self.input.pos != pos then
+          self { input+: { pos: pos } }
+        else
+          self,
     },
 
   first(val)::
