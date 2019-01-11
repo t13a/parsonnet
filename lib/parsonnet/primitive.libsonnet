@@ -4,13 +4,14 @@
   item(
     nextPosFunc,
     getTokenFunc,
+    hasTokenFunc,
     testTokenFunc=any,
     formatTokenFunc=std.toString,
     formatPosFunc=std.toString
   )::
     function(state)
-      local token = getTokenFunc(state.input);
-      if token != null then
+      if hasTokenFunc(state.input) then
+        local token = getTokenFunc(state.input);
         if testTokenFunc(token) then
           state
           .consume(nextPosFunc(state.input))

@@ -2,18 +2,18 @@ local primitive = import 'primitive.libsonnet';
 
 {
   local nextPosWithOffsetPos(input, offsetPos) =
-    if hasToken(input, offsetPos) then
+    if hasTokenWithOffsetPos(input, offsetPos) then
       input.pos + offsetPos
     else
       null,
 
   local getTokenWithLength(input, length) =
-    if hasToken(input, length - 1) then
+    if hasTokenWithOffsetPos(input, length - 1) then
       input.src[input.pos:input.pos + length]
     else
       null,
 
-  local hasToken(input, offsetPos=0) =
+  local hasTokenWithOffsetPos(input, offsetPos=0) =
     input.pos != null &&
     input.pos + offsetPos >= 0 &&
     input.pos + offsetPos < std.length(input.src),
@@ -29,12 +29,14 @@ local primitive = import 'primitive.libsonnet';
   sat(testTokenFunc)::
     local nextPos(input) = nextPosWithOffsetPos(input, 1);
     local getToken(input) = getTokenWithLength(input, 1);
-    primitive.item(nextPos, getToken, testTokenFunc),
+    local hasToken(input) = hasTokenWithOffsetPos(input, 0);
+    primitive.item(nextPos, getToken, hasToken, testTokenFunc),
 
   string(str)::
     assert std.isString(str) : 'str must be a string, got %s' % std.type(str);
     assert std.length(str) >= 1 : 'str length must be greater than or equal to 1, got %d' % std.length(str);
     local nextPos(input) = nextPosWithOffsetPos(input, std.length(str));
     local getToken(input) = getTokenWithLength(input, std.length(str));
-    primitive.item(nextPos, getToken, function(token) token == str),
+    local hasToken(input) = hasTokenWithOffsetPos(input, std.length(str) - 1);
+    primitive.item(nextPos, getToken, hasToken, function(token) token == str),
 }
