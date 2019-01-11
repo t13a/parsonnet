@@ -15,14 +15,14 @@ local newStateTests = {
   zeroSuccessHasOut: expect(new(0).return.success(out).out, out),
   zeroFailureHasErr: expect(new(0).return.failure(err).err, err),
 
-  zeroSuccessStateIsZero: expect(new(0).return.success(out).state(), new(0)),
-  zeroFailureStateIsZero: expect(new(0).return.failure(err).state(), new(0)),
+  zeroSuccessStateIsZero: expect(new(0).return.success(out).remaining(), new(0)),
+  zeroFailureStateIsZero: expect(new(0).return.failure(err).remaining(), new(0)),
 
   zeroConsumeZeroIsZero: expect(new(0).consume(0), new(0)),
   zeroConsumeOneIsOne: expect(new(0).consume(1), new(1)),
 
-  zeroConsumeOneSuccessStateIsOne: expect(new(0).consume(1).return.success(out).state(), new(1)),
-  zeroConsumeOneFailureStateIsOne: expect(new(0).consume(1).return.failure(err).state(), new(1)),
+  zeroConsumeOneSuccessStateIsOne: expect(new(0).consume(1).return.success(out).remaining(), new(1)),
+  zeroConsumeOneFailureStateIsOne: expect(new(0).consume(1).return.failure(err).remaining(), new(1)),
 };
 
 {

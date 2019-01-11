@@ -28,10 +28,10 @@ local itemTests = {
   errorAtTerm: expectNot(parser('1')(term).err, null),
   errorIfEmpty: expectNot(parser('1')(empty).err, null),
 
-  consumptionIfMathced: expectNot(parser('1')(init).state().input.pos, init.input.pos),
-  consumptionIfNotMathced: expectNot(parser('2')(init).state().input.pos, init.input.pos),
-  noConsumptionAtTerm: expect(parser('')(term).state().input.pos, term.input.pos),
-  consumptionIfEmpty: expectNot(parser('1')(empty).state().input.pos, init.input.pos),
+  consumptionIfMathced: expectNot(parser('1')(init).remaining().input.pos, init.input.pos),
+  consumptionIfNotMathced: expectNot(parser('2')(init).remaining().input.pos, init.input.pos),
+  noConsumptionAtTerm: expect(parser('')(term).remaining().input.pos, term.input.pos),
+  consumptionIfEmpty: expectNot(parser('1')(empty).remaining().input.pos, init.input.pos),
 };
 
 local resultTests = {
@@ -40,7 +40,7 @@ local resultTests = {
   local term = state.newState('123', 0).consume(null),
 
   succeedAlways: expect(primitive.result(out)(init), init.return.success(out)),
-  noConsumption: expect(primitive.result(out)(init).state().input.pos, init.input.pos),
+  noConsumption: expect(primitive.result(out)(init).remaining().input.pos, init.input.pos),
 };
 
 local zeroTests = {
@@ -48,7 +48,7 @@ local zeroTests = {
   local init = state.newState('123', 0),
 
   failAlways: expect(primitive.zero(err)(init), init.return.failure(err)),
-  noConsumption: expect(primitive.zero(err)(init).state().input.pos, init.input.pos),
+  noConsumption: expect(primitive.zero(err)(init).remaining().input.pos, init.input.pos),
 };
 
 {

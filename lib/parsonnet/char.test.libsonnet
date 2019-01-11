@@ -32,10 +32,10 @@ local satTests = {
   errorAtTerm: expectNot(char.sat(isA)(term).err, null),
   errorAtEmpty: expectNot(char.sat(isA)(empty).err, null),
 
-  consumptionIfMatched: expect(char.sat(isA)(init).state().input.pos, 1),
-  consumptionIfNotMatched: expect(char.sat(isB)(init).state().input.pos, 1),
-  noConsumptionAtTerm: expect(char.sat(isA)(term).state().input.pos, term.input.pos),
-  consumptionAtEmpty: expectNot(char.sat(isA)(empty).state().input.pos, empty.input.pos),
+  consumptionIfMatched: expect(char.sat(isA)(init).remaining().input.pos, 1),
+  consumptionIfNotMatched: expect(char.sat(isB)(init).remaining().input.pos, 1),
+  noConsumptionAtTerm: expect(char.sat(isA)(term).remaining().input.pos, term.input.pos),
+  consumptionAtEmpty: expectNot(char.sat(isA)(empty).remaining().input.pos, empty.input.pos),
 };
 
 local stringTests = {
@@ -53,10 +53,10 @@ local stringTests = {
   errorAtTerm: expectNot(char.string('AB')(term).err, null),
   errorAtEmpty: expectNot(char.string('AB')(empty).err, null),
 
-  consumptionIfMatched: expect(char.string('AB')(init).state().input.pos, std.length('AB')),
-  consumptionIfNotMatched: expect(char.string('BC')(init).state().input.pos, std.length('BC')),
-  noConsumptionAtTerm: expect(char.string('AB')(term).state().input.pos, term.input.pos),
-  consumptionAtEmpty: expectNot(char.string('AB')(empty).state().input.pos, empty.input.pos),
+  consumptionIfMatched: expect(char.string('AB')(init).remaining().input.pos, std.length('AB')),
+  consumptionIfNotMatched: expect(char.string('BC')(init).remaining().input.pos, std.length('BC')),
+  noConsumptionAtTerm: expect(char.string('AB')(term).remaining().input.pos, term.input.pos),
+  consumptionAtEmpty: expectNot(char.string('AB')(empty).remaining().input.pos, empty.input.pos),
 };
 
 {

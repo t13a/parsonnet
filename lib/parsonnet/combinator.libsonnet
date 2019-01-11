@@ -48,7 +48,7 @@
       if lresult.err == null then
         lresult
       else
-        rparser(lresult.state().flush().input),
+        rparser(lresult.remaining().flush().input),
 
   many(parser)::
     function(state)
@@ -68,7 +68,7 @@
       local result = parser(state.input);
       if result.out != null && result.err == null then
         state
-        .consume(result.state().input.pos)
+        .consume(result.remaining().input.pos)
         .result
         .success(func(result.out))
       else

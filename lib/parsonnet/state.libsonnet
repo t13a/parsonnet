@@ -24,7 +24,7 @@ local util = import 'util.libsonnet';
           assert err != null : 'err must not be null';
           self { err: util.merge(super.err, err) },
 
-        state():: state,
+        remaining():: state,
       },
 
       consume(pos)::
