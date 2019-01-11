@@ -49,4 +49,4 @@ COPY rootfs /
 
 WORKDIR /parsonnet
 
-CMD ["/parsonnet/test/run.sh"]
+CMD ["/parsonnet/test/run"]

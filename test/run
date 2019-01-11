@@ -17,7 +17,7 @@ function run() {
         -f '"real": "%e", "user": "%U", "sys": "%S", "memory": %M, "in": %I, "out": %O'
     )
     local no_stdout_cmd_args=(
-        "${SCRIPT_DIR}/no-stdout.sh"
+        "${SCRIPT_DIR}/no-stdout"
     )
     local jsonnet_cmd_args=(
         "${JSONNET_CMD}"

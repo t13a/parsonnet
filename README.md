@@ -1,6 +1,6 @@
 # Parsonnet
 
-A parser combinator library for [Jsonnet](https://jsonnet.org/).
+A parser combinator implementation for [Jsonnet](https://jsonnet.org/).
 
 ## Introduction
 
