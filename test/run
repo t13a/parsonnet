@@ -21,7 +21,7 @@ function run() {
     )
     local jsonnet_cmd_args=(
         "${JSONNET_CMD}"
-        -J "${LIB_DIR}"
+        -J "${SRC_DIR}"
         --ext-str times="${TIMES}"
     )
 
@@ -73,7 +73,7 @@ export LANG=en_US.utf8
 export LC_COLLATE=C
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
-LIB_DIR="${SCRIPT_DIR}/../lib"
+SRC_DIR="${SCRIPT_DIR}/../src"
 
 TIMES="${TIMES:-1000}"
 
