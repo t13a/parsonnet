@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -euo pipefail
+
+case "${JSONNET_CMD:-jsonnet}" in
+    go-jsonnet)
+        exec /opt/go-jsonnet/jsonnet "${@}"
+        ;;
+    sjsonnet)
+        exec /opt/sjsonnet/sjsonnet.jar "${@}"
+        ;;
+    jsonnet)
+        exec /opt/jsonnet/jsonnet "${@}"
+        ;;
+    *)
+        echo "${JSONNET_CMD}: unknown command" >&2
+        exit 1
+        ;;
+esac

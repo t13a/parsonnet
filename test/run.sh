@@ -1,0 +1,101 @@
+#!/bin/bash
+
+set -euo pipefail
+
+function escape() {
+    echo "${1}" |
+    sed \
+    -e 's|"|\\"|g' \
+    -e ':a;N;$!ba;s|\r|\\r|g' \
+    -e ':a;N;$!ba;s|\n|\\n|g' \
+    -e 's|\t|\\t|g'
+}
+
+function run() {
+    local time_cmd_args=(
+        /usr/bin/time
+        -f '"real": "%e", "user": "%U", "sys": "%S", "memory": %M, "in": %I, "out": %O'
+    )
+    local no_stdout_cmd_args=(
+        "${SCRIPT_DIR}/no-stdout.sh"
+    )
+    local jsonnet_cmd_args=(
+        "${JSONNET_CMD}"
+        -J "${LIB_DIR}"
+        --ext-str times="${TIMES}"
+    )
+
+    if STDERR="$("${time_cmd_args[@]}" "${no_stdout_cmd_args[@]}" "${jsonnet_cmd_args[@]}" "${1}" 2>&1)"
+    then
+        PASS="$((${PASS} + 1))"
+
+        printf \
+        '{ "kind": "TestCase", "path": "%s", "time": { %s } },\n' \
+        "$(escape "${1}")" \
+        "${STDERR}"
+    else
+        FAIL="$((${FAIL} + 1))"
+
+        local stderr_message="$(echo "${STDERR}" | head -n -1)"
+        local stderr_time="$(echo "${STDERR}" | tail -n 1)"
+
+        printf \
+        '{ "kind": "TestCase", "path": "%s", "time": { %s }, "err": "%s" },\n' \
+        "$(escape "${1}")" \
+        "${stderr_time}" \
+        "$(escape "${stderr_message}")"
+    fi
+}
+
+function setup() {
+  printf '[\n'
+}
+
+function teardown() {
+  printf \
+  '{"kind": "TestRunner", "env": { "JSONNET_CMD": "%s", "TIMES": "%s" }, "pass": %s, "fail": %s, "time": %s }\n]\n' \
+  "${JSONNET_CMD}" \
+  "${TIMES}" \
+  "${PASS}" \
+  "${FAIL}" \
+  "$(($(date +%s) - ${TIME_STARTED}))"
+
+  if [ ${FAIL} -eq 0 ]
+  then
+      exit 0
+  else
+      exit 1
+  fi
+}
+
+export JSONNET_CMD="${JSONNET_CMD:-jsonnet}"
+export LANG=en_US.utf8
+export LC_COLLATE=C
+
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+LIB_DIR="${SCRIPT_DIR}/../lib"
+
+TIMES="${TIMES:-1000}"
+
+TIME_STARTED="$(date +%s)"
+PASS=0
+FAIL=0
+
+if [ ${#@} -gt 0 ]
+then
+    TESTS_DIRS=("${@}")
+else
+    TESTS_DIRS=("${SCRIPT_DIR}")
+fi
+
+TESTS=($(find "${TESTS_DIRS[@]}" -name '*.jsonnet' -printf '%p\n' | sort))
+
+setup
+
+trap teardown EXIT INT TERM
+
+for TEST in "${TESTS[@]}"
+do
+    run "${TEST}"
+done
+
