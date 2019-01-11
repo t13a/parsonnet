@@ -12,7 +12,7 @@ local util = import 'util.libsonnet';
         pos: initPos,
       },
 
-      result: {
+      return: {
         out: null,
         err: null,
 

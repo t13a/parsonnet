@@ -14,12 +14,12 @@
         if testTokenFunc(token) then
           state
           .consume(nextPosFunc(state.input))
-          .result
+          .return
           .success(token)
         else
           state
           .consume(nextPosFunc(state.input))
-          .result
+          .return
           .failure(
             "unexpected token '%s' found at %s" % [
               std.strReplace(formatTokenFunc(token), "'", "\\'"),
@@ -29,18 +29,18 @@
       else
         state
         .consume(nextPosFunc(state.input))
-        .result
+        .return
         .failure('token not found at %s' % formatPosFunc(state.input.pos)),
 
   result(out)::
     function(state)
       state
-      .result
+      .return
       .success(out),
 
   zero(err)::
     function(state)
       state
-      .result
+      .return
       .failure(err),
 }
