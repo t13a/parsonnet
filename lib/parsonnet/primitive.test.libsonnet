@@ -36,7 +36,7 @@ local resultTests = {
   local init = state.newState('123', 0),
   local term = state.newState('123', 0).consume(null),
 
-  succeedAlways: expect(primitive.result(out)(init), init.return.success(out)),
+  succeedAlways: expect(primitive.result(out)(init), init.result.success(out)),
   noConsumption: expect(primitive.result(out)(init).remaining().input.pos, init.input.pos),
 };
 
@@ -44,7 +44,7 @@ local zeroTests = {
   local err = 'ERR',
   local init = state.newState('123', 0),
 
-  failAlways: expect(primitive.zero(err)(init), init.return.failure(err)),
+  failAlways: expect(primitive.zero(err)(init), init.result.failure(err)),
   noConsumption: expect(primitive.zero(err)(init).remaining().input.pos, init.input.pos),
 };
 
