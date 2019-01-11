@@ -4,8 +4,6 @@ local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' %
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
 local arrayAccumTests = {
-  local reverse(a, b) = [b] + a,
-
   accumFrom0: expect(util.arrayEnum([])(util.arrayAccum), []),
   accumFrom1: expect(util.arrayEnum([1])(util.arrayAccum), [1]),
   accumFrom2: expect(util.arrayEnum([1, 2])(util.arrayAccum), [1, 2]),
