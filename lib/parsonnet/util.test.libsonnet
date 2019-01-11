@@ -3,27 +3,27 @@ local util = import 'util.libsonnet';
 local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' % [a, b];
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
-local accumTests = {
-  accumFrom0: expect(util.enum(util.accum(), []), []),
-  accumFrom1: expect(util.enum(util.accum(), [1]), [1]),
-  accumFrom2: expect(util.enum(util.accum(), [1, 2]), [1, 2]),
-  accumFrom3: expect(util.enum(util.accum(), [1, 2, 3]), [1, 2, 3]),
-  accumReverseFrom0: expect(util.enum(util.accum(true), []), []),
-  accumReverseFrom1: expect(util.enum(util.accum(true), [1]), [1]),
-  accumReverseFrom2: expect(util.enum(util.accum(true), [1, 2]), [2, 1]),
-  accumReverseFrom3: expect(util.enum(util.accum(true), [1, 2, 3]), [3, 2, 1]),
+local arrayAccumTests = {
+  local reverse(a, b) = [b] + a,
+
+  accumFrom0: expect(util.arrayEnum([])(util.arrayAccum), []),
+  accumFrom1: expect(util.arrayEnum([1])(util.arrayAccum), [1]),
+  accumFrom2: expect(util.arrayEnum([1, 2])(util.arrayAccum), [1, 2]),
+  accumFrom3: expect(util.arrayEnum([1, 2, 3])(util.arrayAccum), [1, 2, 3]),
 };
 
-local enumTests = {
+local arrayEnumTests = {
   local accum1(a) = a,
   local accum2(a) = function(b) [a, b],
-  enum1From0: expect(util.enum(accum1, []), null),
-  enum1From1: expect(util.enum(accum1, [1]), 1),
-  enum1From2: expect(util.enum(accum1, [1, 2]), 1),
-  enum2From0: expect(util.enum(accum2, []), [null, null]),
-  enum2From1: expect(util.enum(accum2, [1]), [1, null]),
-  enum2From2: expect(util.enum(accum2, [1, 2]), [1, 2]),
-  enum2From3: expect(util.enum(accum2, [1, 2, 3]), [1, 2]),
+
+  enum1From0: expect(util.arrayEnum([])(accum1), null),
+  enum1From1: expect(util.arrayEnum([1])(accum1), 1),
+  enum1From2: expect(util.arrayEnum([1, 2])(accum1), 1),
+
+  enum2From0: expect(util.arrayEnum([])(accum2), [null, null]),
+  enum2From1: expect(util.arrayEnum([1])(accum2), [1, null]),
+  enum2From2: expect(util.arrayEnum([1, 2])(accum2), [1, 2]),
+  enum2From3: expect(util.arrayEnum([1, 2, 3])(accum2), [1, 2]),
 };
 
 local headTests = {
@@ -60,8 +60,8 @@ local tailTests = {
 };
 
 {
-  accumTests: accumTests,
-  enumTests: enumTests,
+  arrayAccumTests: arrayAccumTests,
+  arrayEnumTests: arrayEnumTests,
   headTests: headTests,
   mergeTests: mergeTests,
   tailTests: tailTests,
