@@ -27,11 +27,13 @@ local util = import 'util.libsonnet';
     local recurseUntilFailure(a) =
       if a.isSuccess() then
         if a.remaining.hasInp() then
-          self.seq(primitive.result(a), self.many(parser))
+          function(state)
+            [a] + self.many(parser)(state)
         else
-          primitive.result(a)
+          primitive.result(a.out)
       else
-        function(state) [];  // empty result
+        function(state)
+          [];
     self.bind(parser, recurseUntilFailure),
 
   plus(lparser, rparser)::
