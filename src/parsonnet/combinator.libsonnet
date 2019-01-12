@@ -1,86 +1,65 @@
+local primitive = import 'primitive.libsonnet';
+local util = import 'util.libsonnet';
+
 {
   local combinator = self,
 
-  newApplicative(parser):: {
-    parser:: parser,
+  newBuilder(initParser):: {
+    parser:: initParser,
 
-    and(parser):: self + { parser: combinator.and(super.parser, parser) },
-    bind(func):: self + { parser: combinator.bind(super.parser, func) },
-    or(parser):: self + { parser: combinator.or(super.parser, parser) },
-    map(func):: self + { parser: combinator.map(super.parser, func) },
-    many():: self + { parser: combinator.many(super.parser },
-    try():: self + { parser: combinator.try(super.parser },
+    bind(func):: self { parser: combinator.bind(super.parser, func) },
+    many():: self { parser: combinator.many(super.parser) },
+    plus(parser):: self { parser: combinator.plus(super.parser, parser) },
+    seq(parser):: self { parser: combinator.seq(super.parser, parser) },
+    try():: self { parser: combinator.try(super.parser) },
   },
 
-  and(lparser, rparser)::
-    function(state)
-      local lresult = lparser(state);
-      if lresult.err == null then
-        local rresult = rparser(lresult);
-        if rresult.err == null then
-          state
-          .result()
-          .success([lresult, rresult])
-          .consume(rresult.next.pos)
-        else
-          rresult
-      else
-        lresult,
-
   bind(parser, func)::
-    local enumResult(result) =
-      if std.isArray(result.out) then
-        result.out
-      else if result.out != null then
-        [result.out]
-      else
-        [];
     function(state)
-      std.flattenArrays([
-        func(result.out)(result.next)
-        for result in enumResult(parser(state))
-        if result.out != null && result.err == null
-      ]),
-
-  or(lparser, rparser)::
-    function(state)
-      local lresult = lparser(state.input);
-      if lresult.err == null then
-        lresult
-      else
-        rparser(lresult.remaining().flush().input),
+      util.result.successesOrFailures(std.flattenArrays(
+        [
+          func(a)(a.remaining)
+          for a in parser(state)
+        ]
+      )),
 
   many(parser)::
-    function(state)
-      local aux(s, results) =
-        local r = parser(s);
-        if r.err == null then
-          if r.next.pos != null then
-            aux(r.next, results + [r]) tailstrict
+    self.bind(
+      parser,
+      function(a)
+        if a.isSuccess() then
+          if a.remaining.hasInp() then
+            self.many(parser)  // tailstrict
           else
-            results + [r]
+            primitive.result(a)
         else
-          results;
-      aux(state, []),
+          primitive.result()
+    ),
 
-  map(parser, func)::
-    function(state)
-      local result = parser(state.input);
-      if result.out != null && result.err == null then
-        state
-        .consume(result.remaining().input.pos)
-        .result
-        .success(func(result.out))
+  plus(lparser, rparser)::
+    local applyIfFailure(a) =
+      if a.isSuccess() then
+        primitive.result(a.out)
       else
-        result,
+        rparser;
+    self.bind(lparser, applyIfFailure),
+
+  seq(lparser, rparser)::
+    local applyIfSuccess(a) =
+      if a.isSuccess() then
+        function(state)
+          [a] + rparser(state)
+      else
+        primitive.zero(a.err);
+    self.bind(lparser, applyIfSuccess),
 
   try(parser)::
     function(state)
-      local result = parser(state.input);
-      if result.err == null then
-        result
+      local a = parser(state);
+      local s = util.result.successes(a);
+      local f = util.result.failures(a);
+      if std.length(f) == 0 then
+        s
       else
-        state
-        .result
-        .failure(result.err),
+        std.map(function(ff) state.failure(ff.err), f),
 }

@@ -3,28 +3,38 @@ local state = import 'parsonnet/state.libsonnet';
 local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' % [a, b];
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
-local newStateTests = {
-  local src = 'SRC',
-  local out = 'OUT',
-  local err = 'ERR',
-  local new(pos) = state.newState(src, pos),
+local newStateTest = {
+  local new(inp) = state.newState(inp),
 
-  zeroIsZero: expect(new(0), new(0)),
-  oneIsNotZero: expectNot(new(1), new(0)),
+  hasInpTest: {
+    case1: expect(new(0).hasInp(), true),
+    case2: expect(new(0).setInp(1).hasInp(), true),
+    case3: expect(new(0).setInp(null).hasInp(), false),
+  },
 
-  zeroSuccessHasOut: expect(new(0).result.success(out).out, out),
-  zeroFailureHasErr: expect(new(0).result.failure(err).err, err),
+  setInpTest: {
+    case1: expect(new(0).inp, 0),
+    case2: expect(new(0).setInp(1).inp, 1),
+    case3: expect(new(0).setInp(1).setInp(2).inp, 2),
+    case4: expect(new(0).setInp(null).inp, null),
+    case5: expect(new(0).setInp(null).setInp(3).inp, 3),
+  },
 
-  zeroSuccessStateIsZero: expect(new(0).result.success(out).remaining(), new(0)),
-  zeroFailureStateIsZero: expect(new(0).result.failure(err).remaining(), new(0)),
+  successTest: {
+    remainingTest: {
+      case1: expect(new(0).success(0).remaining, new(0)),
+      case2: expect(new(0).setInp(1).success(0).remaining, new(1)),
+    },
+  },
 
-  zeroConsumeZeroIsZero: expect(new(0).consume(0), new(0)),
-  zeroConsumeOneIsOne: expect(new(0).consume(1), new(1)),
-
-  zeroConsumeOneSuccessStateIsOne: expect(new(0).consume(1).result.success(out).remaining(), new(1)),
-  zeroConsumeOneFailureStateIsOne: expect(new(0).consume(1).result.failure(err).remaining(), new(1)),
+  failureTest: {
+    remainingTest: {
+      case1: expect(new(0).failure(0).remaining, new(0)),
+      case2: expect(new(0).setInp(1).failure(0).remaining, new(1)),
+    },
+  },
 };
 
 {
-  newStateTests: newStateTests,
+  newStateTest: newStateTest,
 }

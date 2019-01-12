@@ -1,66 +1,67 @@
+local state = import 'parsonnet/state.libsonnet';
 local util = import 'parsonnet/util.libsonnet';
 
 local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' % [a, b];
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
-local arrayAccumTests = {
-  accumFrom0: expect(util.arrayEnum([])(util.arrayAccum), []),
-  accumFrom1: expect(util.arrayEnum([1])(util.arrayAccum), [1]),
-  accumFrom2: expect(util.arrayEnum([1, 2])(util.arrayAccum), [1, 2]),
-  accumFrom3: expect(util.arrayEnum([1, 2, 3])(util.arrayAccum), [1, 2, 3]),
+local arrayTest = {
+  headTest: {
+    case1: expect(util.array.head([1, 2, 3]), 1),
+    case2: expect(util.array.head([]), null),
+  },
+
+  tailTest: {
+    case1: expect(util.array.tail([1]), []),
+    case2: expect(util.array.tail([1, 2]), [2]),
+    case3: expect(util.array.tail([1, 2, 3]), [2, 3]),
+    case4: expect(util.array.tail([]), []),
+  },
 };
 
-local arrayEnumTests = {
-  local accum1(a) = a,
-  local accum2(a) = function(b) [a, b],
+local resultTest = {
+  local e = [],
+  local s = [
+    state.newState(0).success(1),
+    state.newState(0).success(2),
+    state.newState(0).success(3),
+  ],
+  local f = [
+    state.newState(0).failure(4),
+    state.newState(0).failure(5),
+    state.newState(0).failure(6),
+  ],
+  local sf = s + f,
 
-  enum1From0: expect(util.arrayEnum([])(accum1), null),
-  enum1From1: expect(util.arrayEnum([1])(accum1), 1),
-  enum1From2: expect(util.arrayEnum([1, 2])(accum1), 1),
+  failuresTest: {
+    case1: expect(util.result.failures(e), e),
+    case2: expect(util.result.failures(s), e),
+    case3: expect(util.result.failures(f), f),
+    case4: expect(util.result.failures(sf), f),
+  },
 
-  enum2From0: expect(util.arrayEnum([])(accum2), [null, null]),
-  enum2From1: expect(util.arrayEnum([1])(accum2), [1, null]),
-  enum2From2: expect(util.arrayEnum([1, 2])(accum2), [1, 2]),
-  enum2From3: expect(util.arrayEnum([1, 2, 3])(accum2), [1, 2]),
-};
+  failuresOrSuccessesTest: {
+    case1: expect(util.result.failuresOrSuccesses(e), e),
+    case2: expect(util.result.failuresOrSuccesses(s), s),
+    case3: expect(util.result.failuresOrSuccesses(f), f),
+    case4: expect(util.result.failuresOrSuccesses(sf), f),
+  },
 
-local headTests = {
-  valueFromValue: expect(util.head(1), 1),
-  headValueFromArray: expect(util.head([1, 2, 3]), 1),
-  nullFromNull: expect(util.head(null), null),
-  nullFromEmptyArray: expect(util.head([]), null),
-};
+  successesTest: {
+    case1: expect(util.result.successes(e), e),
+    case2: expect(util.result.successes(s), s),
+    case3: expect(util.result.successes(f), e),
+    case4: expect(util.result.successes(sf), s),
+  },
 
-local mergeTests = {
-  local left = 'LEFT',
-  local right = 'RIGHT',
-
-  nullAndNullIsNull: expect(util.merge(null, null), null),
-  nullAndRightIsRight: expect(util.merge(null, right), right),
-  nullAndRightArrayIsRightArray: expect(util.merge(null, [right]), [right]),
-
-  leftAndNullIsLeft: expect(util.merge(left, null), left),
-  leftAndRightIsJoinedArray: expect(util.merge(left, right), [left, right]),
-  leftAndRightArrayIsJoinedArray: expect(util.merge(left, [right]), [left, right]),
-
-  leftArrayAndNullIsLeftArray: expect(util.merge([left], null), [left]),
-  leftArrayAndRightIsJoinedArray: expect(util.merge([left], right), [left, right]),
-  leftArrayAndRightArrayIsJoinedArray: expect(util.merge([left], [right]), [left, right]),
-};
-
-local tailTests = {
-  emptyArrayFromValue: expect(util.tail(1), []),
-  emptyArrayFromArray1: expect(util.tail([1]), []),
-  arrayFromArray2: expect(util.tail([1, 2]), [2]),
-  arrayFromArray3: expect(util.tail([1, 2, 3]), [2, 3]),
-  emptyArrayFromNull: expect(util.tail(null), []),
-  emptyArrayFromEmptyArray: expect(util.tail([]), []),
+  successesOrFailuresTest: {
+    case1: expect(util.result.successesOrFailures(e), e),
+    case2: expect(util.result.successesOrFailures(s), s),
+    case3: expect(util.result.successesOrFailures(f), f),
+    case4: expect(util.result.successesOrFailures(sf), s),
+  },
 };
 
 {
-  arrayAccumTests: arrayAccumTests,
-  arrayEnumTests: arrayEnumTests,
-  headTests: headTests,
-  mergeTests: mergeTests,
-  tailTests: tailTests,
+  arrayTest: arrayTest,
+  resultTest: resultTest,
 }

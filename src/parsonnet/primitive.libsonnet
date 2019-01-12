@@ -2,46 +2,51 @@
   local any(x) = true,
 
   item(
-    nextPosFunc,
+    remainingInpFunc,
     getTokenFunc,
     hasTokenFunc,
     testTokenFunc=any,
-    formatTokenFunc=std.toString,
-    formatPosFunc=std.toString
+    formatInpFunc=std.toString,
+    formatTokenFunc=std.toString
   )::
     function(state)
-      if hasTokenFunc(state.input) then
-        local token = getTokenFunc(state.input);
+      if state.hasInp() && hasTokenFunc(state.inp) then
+        local token = getTokenFunc(state.inp);
         if testTokenFunc(token) then
-          state
-          .consume(nextPosFunc(state.input))
-          .result
-          .success(token)
+          [
+            state
+            .setInp(remainingInpFunc(state.inp))
+            .success(token),
+          ]
         else
-          state
-          .consume(nextPosFunc(state.input))
-          .result
-          .failure(
-            "unexpected token '%s' found at %s" % [
-              std.strReplace(formatTokenFunc(token), "'", "\\'"),
-              formatPosFunc(state.input),
-            ]
-          )
+          [
+            state
+            .setInp(remainingInpFunc(state.inp))
+            .failure(
+              "unexpected token '%s' found at %s" % [
+                std.strReplace(formatTokenFunc(token), "'", "\\'"),
+                formatInpFunc(state.inp),
+              ]
+            ),
+          ]
       else
-        state
-        .consume(nextPosFunc(state.input))
-        .result
-        .failure('token not found at %s' % formatPosFunc(state.input.pos)),
+        [
+          state
+          .setInp(remainingInpFunc(state.inp))
+          .failure('token not found at %s' % formatInpFunc(state.inp)),
+        ],
 
   result(out)::
     function(state)
-      state
-      .result
-      .success(out),
+      [
+        state
+        .success(out),
+      ],
 
   zero(err)::
     function(state)
-      state
-      .result
-      .failure(err),
+      [
+        state
+        .failure(err),
+      ],
 }

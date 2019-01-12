@@ -3,9 +3,8 @@
 set -euo pipefail
 
 function escape() {
-    echo "${1}" |
+    echo "${1//\"/\\\"}" |
     sed \
-    -e 's|"|\\"|g' \
     -e ':a;N;$!ba;s|\r|\\r|g' \
     -e ':a;N;$!ba;s|\n|\\n|g' \
     -e 's|\t|\\t|g'
@@ -40,7 +39,7 @@ function run() {
         local stderr_time="$(echo "${STDERR}" | tail -n 1)"
 
         printf \
-        '{ "kind": "TestCase", "path": "%s", "time": { %s }, "err": "%s" },\n' \
+        '{ "kind": "TestCase", "path": "%s", "time": { %s }, "error": "%s" },\n' \
         "$(escape "${1}")" \
         "${stderr_time}" \
         "$(escape "${stderr_message}")"

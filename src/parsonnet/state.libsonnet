@@ -1,36 +1,24 @@
-local util = import 'util.libsonnet';
-
 {
-  newState(src, initPos)::
-    assert src != null : 'src must not be null';
-    assert initPos != null : 'initPos must not be null';
-    {
-      local state = self,
+  newState(initInp):: {
+    local state = self,
 
-      input: {
-        src: src,
-        pos: initPos,
-      },
+    inp: initInp,
 
-      result: {
-        out: null,
-        err: null,
+    hasInp():: self.inp != null,
+    setInp(inp):: self { inp: inp },
 
-        success(out)::
-          assert out != null : 'out must not be null';
-          self { out: util.merge(super.out, out) },
+    success(out):: {
+      out: out,
+      remaining: state,
 
-        failure(err)::
-          assert err != null : 'err must not be null';
-          self { err: util.merge(super.err, err) },
-
-        remaining():: state,
-      },
-
-      consume(pos)::
-        if self.input.pos != pos then
-          self { input+: { pos: pos } }
-        else
-          self,
+      isSuccess():: true,
     },
+
+    failure(err):: {
+      err: err,
+      remaining: state,
+
+      isSuccess():: false,
+    },
+  },
 }

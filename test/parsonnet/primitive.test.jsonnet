@@ -4,52 +4,64 @@ local state = import 'parsonnet/state.libsonnet';
 local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' % [a, b];
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];
 
-local itemTests = {
-  local nextPos(input) = if input.pos != null && hasToken(input { pos: super.pos + 1 }) then input.pos + 1,
-  local getToken(input) = if input.pos != null && hasToken(input) then input.src[input.pos],
-  local hasToken(input) = input.pos != null && input.pos >= 0 && input.pos < std.length(input.src),
-  local sat(char) = primitive.item(nextPos, getToken, hasToken, function(token) token == char),
+local itemTest = {
+  local remainingInp(inp) = if inp != null then inp + 1 else null,
+  local getToken(inp) = inp,
+  local hasToken(inp) = inp != null,
+  local sat(n) = primitive.item(remainingInp, getToken, hasToken, function(token) token == n),
 
-  local out = 'OUT',
-  local init = state.newState('123', 0),
-  local term = state.newState('123', 0).consume(null),
-  local empty = state.newState('', 0),
+  local init = state.newState(0),
+  local term = state.newState(0).setInp(null),
 
-  outputIfMatched: expect(sat('1')(init).out, '1'),
-  noOutputIfNotMatched: expect(sat('2')(init).out, null),
-  noOutputAtTerm: expect(sat('1')(term).out, null),
-  noOutputIfEmpty: expect(sat('1')(empty).out, null),
+  singleAtInitIfMatched: expect(std.length(sat(0)(init)), 1),
+  singleAtInitIfNotMatched: expect(std.length(sat(0)(init)), 1),
+  singleAtTerm: expect(std.length(sat(0)(term)), 1),
 
-  noErrorIfMatched: expect(sat('1')(init).err, null),
-  errorIfNotMatched: expectNot(sat('2')(init).err, null),
-  errorAtTerm: expectNot(sat('1')(term).err, null),
-  errorIfEmpty: expectNot(sat('1')(empty).err, null),
+  outputAtInitIfMatched: expect(sat(0)(init)[0].out, 0),
+  noOutputAtInitIfNotMatched: expect(std.objectHas(sat(1)(init)[0], 'out'), false),
+  noOutputAtTerm: expect(std.objectHas(sat(0)(term)[0], 'out'), false),
 
-  consumptionIfMathced: expectNot(sat('1')(init).remaining().input.pos, init.input.pos),
-  consumptionIfNotMathced: expectNot(sat('2')(init).remaining().input.pos, init.input.pos),
-  noConsumptionAtTerm: expect(sat('')(term).remaining().input.pos, term.input.pos),
-  consumptionIfEmpty: expectNot(sat('1')(empty).remaining().input.pos, init.input.pos),
+  noErrorAtInitIfMatched: expect(std.objectHas(sat(0)(init)[0], 'err'), false),
+  errorAtInitIfNotMatched: expectNot(sat(1)(init)[0].err, null),
+  errorAtTerm: expectNot(sat(0)(term)[0].err, null),
+
+  consumptionAtInitIfMathced: expectNot(sat(0)(init)[0].remaining.inp, init.inp),
+  consumptionAtInitIfNotMathced: expectNot(sat(1)(init)[0].remaining.inp, init.inp),
+  noConsumptionAtTerm: expect(sat(0)(term)[0].remaining.inp, term.inp),
 };
 
-local resultTests = {
+local resultTest = {
   local out = 'OUT',
-  local init = state.newState('123', 0),
-  local term = state.newState('123', 0).consume(null),
+  local init = state.newState(0),
+  local term = state.newState(0).setInp(null),
 
-  succeedAlways: expect(primitive.result(out)(init), init.result.success(out)),
-  noConsumption: expect(primitive.result(out)(init).remaining().input.pos, init.input.pos),
+  singleAtInit: expect(std.length(primitive.result(out)(init)), 1),
+  singleAtTerm: expect(std.length(primitive.result(out)(term)), 1),
+
+  successAtInit: expect(primitive.result(out)(init)[0], init.success(out)),
+  successAtTerm: expect(primitive.result(out)(term)[0], term.success(out)),
+
+  noConsumptionAtInit: expect(primitive.result(out)(init)[0].remaining.inp, init.inp),
+  noConsumptionAtTerm: expect(primitive.result(out)(term)[0].remaining.inp, term.inp),
 };
 
-local zeroTests = {
+local zeroTest = {
   local err = 'ERR',
-  local init = state.newState('123', 0),
+  local init = state.newState(0),
+  local term = state.newState(0).setInp(null),
 
-  failAlways: expect(primitive.zero(err)(init), init.result.failure(err)),
-  noConsumption: expect(primitive.zero(err)(init).remaining().input.pos, init.input.pos),
+  singleAtInit: expect(std.length(primitive.zero(err)(init)), 1),
+  singleAtTerm: expect(std.length(primitive.zero(err)(term)), 1),
+
+  failureAtInit: expect(primitive.zero(err)(init)[0], init.failure(err)),
+  failureAtTerm: expect(primitive.zero(err)(term)[0], term.failure(err)),
+
+  noConsumptionAtInit: expect(primitive.zero(err)(init)[0].remaining.inp, init.inp),
+  noConsumptionAtTerm: expect(primitive.zero(err)(term)[0].remaining.inp, term.inp),
 };
 
 {
-  itemTests: itemTests,
-  resultTests: resultTests,
-  zeroTests: zeroTests,
+  itemTest: itemTest,
+  resultTest: resultTest,
+  zeroTest: zeroTest,
 }

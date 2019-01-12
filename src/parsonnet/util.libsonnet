@@ -1,56 +1,59 @@
 {
-  local util = self,
-
-  arrayAccum(x)::
-    local aux(y, a=[]) =
-      if y != null then
-        function(z)
-          aux(z, a + [y])
+  array:: {
+    head(arr)::
+      assert std.isArray(arr) : 'arr must be an array, got %s' % std.type(arr);
+      if std.length(arr) > 0 then
+        arr[0]
       else
-        a;
-    aux(x, []),
+        null,
 
-  arrayEnum(x)::
-    function(accumFunc)
-      local aux(f, y) =
-        local g = f(util.head(y));
-        if std.isFunction(g) then
-          aux(g, util.tail(y)) tailstrict
-        else
-          g;
-      aux(accumFunc, x),
-
-  head(x)::
-    if x != null then
-      if std.isArray(x) then
-        if std.length(x) > 0 then
-          x[0]
-        else
-          null
+    tail(arr)::
+      assert std.isArray(arr) : 'arr must be an array, got %s' % std.type(arr);
+      if std.length(arr) > 1 then
+        arr[1:std.length(arr)]
       else
-        x
-    else
-      null,
+        [],
+  },
 
-  merge(left, right)::
-    local l = util.pruneArray(left);
-    local r = util.pruneArray(right);
-    if l != null && r != null then
-      (if std.isArray(l) then l else [l]) +
-      (if std.isArray(r) then r else [r])
-    else if l != null then
-      l
-    else if r != null then
-      r
-    else
-      null,
+  result:: {
+    failures(results)::
+      std.filter(self.pred.failure, results),
 
-  pruneArray(x)::
-    if std.isArray(x) && std.length(x) == 0 then null else x,
+    failuresOrSuccesses(results)::
+      local s = self.successes(results);
+      local f = self.failures(results);
+      if std.length(f) > 0 then f else s,
 
-  tail(x)::
-    if x != null && std.isArray(x) && std.length(x) > 1 then
-      x[1:std.length(x)]
-    else
-      [],
+    successes(results)::
+      std.filter(self.pred.success, results),
+
+    successesOrFailures(results)::
+      local s = self.successes(results);
+      local f = self.failures(results);
+      if std.length(s) > 0 then s else f,
+
+    pred: {
+      failure(result)::
+        assert std.isObject(result) : 'result must be an object, got %s' % std.type(result);
+        !result.isSuccess(),
+
+      /*
+       * The array of result is assumed as follows:
+       *
+       * - Success results and failure results are not mixed in one array.
+       * - An array on success may not contain anything.
+       * - An array on failure contains at least one result.
+       */
+      failures(results)::
+        assert std.isArray(results) : 'results must be an array, got %s' % std.type(results);
+        std.length(results) > 0 && !results[0].isSuccess(),
+
+      success(result)::
+        assert std.isObject(result) : 'result must be an object, got %s' % std.type(result);
+        result.isSuccess(),
+
+      successes(results)::
+        !self.failures(results),
+    },
+  },
 }
