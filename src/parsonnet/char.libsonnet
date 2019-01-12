@@ -1,3 +1,4 @@
+local combinator = import 'combinator.libsonnet';
 local posixchar = import 'posixchar.libsonnet';
 local primitive = import 'primitive.libsonnet';
 local state = import 'state.libsonnet';
@@ -5,33 +6,38 @@ local state = import 'state.libsonnet';
 {
   newState(src)::
     assert std.isString(src) : 'src must be a string, got %s' % std.type(src);
-    state.newState(src, 0),
+    state.newState(
+      {
+        src: src,
+        pos: 0,
+      }
+    ),
 
-  local nextPosWithOffsetPos(input, offsetPos) =
-    if hasTokenWithOffsetPos(input, offsetPos) then
-      input.pos + offsetPos
+  local remainingInpWithOffsetPos(inp, offsetPos) =
+    if hasTokenWithOffsetPos(inp, offsetPos) then
+      inp.pos + offsetPos
     else
       null,
 
-  local getTokenWithLength(input, length) =
-    if hasTokenWithOffsetPos(input, length - 1) then
-      input.src[input.pos:input.pos + length]
+  local getTokenWithTokenLength(inp, tokenLength) =
+    if hasTokenWithOffsetPos(inp, tokenLength - 1) then
+      inp.src[inp.pos:inp.pos + tokenLength]
     else
       null,
 
-  local hasTokenWithOffsetPos(input, offsetPos=0) =
-    input.pos != null &&
-    input.pos + offsetPos >= 0 &&
-    input.pos + offsetPos < std.length(input.src),
+  local hasTokenWithOffsetPos(inp, offsetPos=0) =
+    inp.pos != null &&
+    inp.pos + offsetPos >= 0 &&
+    inp.pos + offsetPos < std.length(inp.src),
 
   // Character
 
   sat(func)::
     assert std.isFunction(func) : 'func must be a function, got %s' % std.type(func);
-    local nextPos(input) = nextPosWithOffsetPos(input, 1);
-    local getToken(input) = getTokenWithLength(input, 1);
-    local hasToken(input) = hasTokenWithOffsetPos(input, 0);
-    primitive.item(nextPos, getToken, hasToken, func),
+    local remainingInp(inp) = remainingInpWithOffsetPos(inp, 1);
+    local getToken(inp) = getTokenWithTokenLength(inp, 1);
+    local hasToken(inp) = hasTokenWithOffsetPos(inp, 0);
+    primitive.item(remainingInp, getToken, hasToken, func),
 
   anyChar::
     self.sat(function(token) true),
@@ -56,10 +62,10 @@ local state = import 'state.libsonnet';
   string(str)::
     assert std.isString(str) : 'str must be a string, got %s' % std.type(str);
     assert std.length(str) >= 1 : 'str length must be greater than or equal to 1, got %d' % std.length(str);
-    local nextPos(input) = nextPosWithOffsetPos(input, std.length(str));
-    local getToken(input) = getTokenWithLength(input, std.length(str));
-    local hasToken(input) = hasTokenWithOffsetPos(input, std.length(str) - 1);
-    primitive.item(nextPos, getToken, hasToken, function(token) token == str),
+    local remainingInp(inp) = remainingInpWithOffsetPos(inp, std.length(str));
+    local getToken(inp) = getTokenWithTokenLength(inp, std.length(str));
+    local hasToken(inp) = hasTokenWithOffsetPos(inp, std.length(str) - 1);
+    primitive.item(remainingInp, getToken, hasToken, function(token) token == str),
 
   // POSIX character classes
 
