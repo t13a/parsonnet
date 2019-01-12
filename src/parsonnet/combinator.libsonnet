@@ -24,17 +24,15 @@ local util = import 'util.libsonnet';
       )),
 
   many(parser)::
-    self.bind(
-      parser,
-      function(a)
-        if a.isSuccess() then
-          if a.remaining.hasInp() then
-            self.many(parser)  // tailstrict
-          else
-            primitive.result(a)
+    local recurseUntilFailure(a) =
+      if a.isSuccess() then
+        if a.remaining.hasInp() then
+          self.seq(primitive.result(a), self.many(parser))
         else
-          primitive.result()
-    ),
+          primitive.result(a)
+      else
+        function(state) [];  // empty result
+    self.bind(parser, recurseUntilFailure),
 
   plus(lparser, rparser)::
     local applyIfFailure(a) =
@@ -56,10 +54,8 @@ local util = import 'util.libsonnet';
   try(parser)::
     function(state)
       local a = parser(state);
-      local s = util.result.successes(a);
-      local f = util.result.failures(a);
-      if std.length(f) == 0 then
-        s
+      if util.result.pred.successes(a) then
+        a
       else
-        std.map(function(ff) state.failure(ff.err), f),
+        std.map(function(b) state.failure(b.err), a),
 }
