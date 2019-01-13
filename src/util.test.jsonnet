@@ -1,5 +1,5 @@
-local state = import 'parsonnet/state.libsonnet';
-local util = import 'parsonnet/util.libsonnet';
+local state = import 'state.libsonnet';
+local util = import 'util.libsonnet';
 
 local expect(a, b) = if a == b then true else error 'Expect equal to:\n%s\n%s' % [a, b];
 local expectNot(a, b) = if a != b then true else error 'Expect not equal to:\n%s\n%s' % [a, b];

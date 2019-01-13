@@ -84,10 +84,10 @@ if [ ${#@} -gt 0 ]
 then
     TESTS_DIRS=("${@}")
 else
-    TESTS_DIRS=("${SCRIPT_DIR}")
+    TESTS_DIRS=("${SRC_DIR}")
 fi
 
-TESTS=($(find "${TESTS_DIRS[@]}" -name '*.jsonnet' -printf '%p\n' | sort))
+TESTS=($(find "${TESTS_DIRS[@]}" -name '*.test.jsonnet' -printf '%p\n' | sort))
 
 setup
 
