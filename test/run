@@ -29,7 +29,7 @@ function run() {
         PASS="$((${PASS} + 1))"
 
         printf \
-        '{ "kind": "TestCase", "path": "%s", "time": { %s } },\n' \
+        '{ "kind": "Suite", "path": "%s", "time": { %s } },\n' \
         "$(escape "${1}")" \
         "${STDERR}"
     else
@@ -52,7 +52,7 @@ function setup() {
 
 function teardown() {
   printf \
-  '{"kind": "TestRunner", "env": { "JSONNET_CMD": "%s", "TIMES": "%s" }, "pass": %s, "fail": %s, "time": %s }\n]\n' \
+  '{"kind": "Runner", "env": { "JSONNET_CMD": "%s", "TIMES": "%s" }, "pass": %s, "fail": %s, "time": %s }\n]\n' \
   "${JSONNET_CMD}" \
   "${TIMES}" \
   "${PASS}" \
