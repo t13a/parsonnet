@@ -1,52 +1,36 @@
+local models = import 'models.libsonnet';
+
 {
+  local primitive = self,
   local any(x) = true,
 
-  item(
-    remainingInpFunc,
-    getTokenFunc,
-    hasTokenFunc,
-    testTokenFunc=any,
-    formatInpFunc=std.toString,
-    formatTokenFunc=std.toString
-  )::
+  factory(builder):: {
+    item(func=any):: builder(primitive.item(func)),
+    result(out, err=[]):: builder(primitive.result(out, err)),
+    zero(err=[]):: builder(primitive.zero(err)),
+  },
+
+  item(func=any)::
     function(state)
-      if state.hasInp() && hasTokenFunc(state.inp) then
-        local token = getTokenFunc(state.inp);
-        if testTokenFunc(token) then
-          [
-            state
-            .setInp(remainingInpFunc(state.inp))
-            .success(token),
-          ]
+      if state.reader().hasItem(state.pos) then
+        local item = state.reader().getItem(state.pos);
+        if func(item) then
+          models.newSuccess(models.newOutput(item, state.next()))
         else
-          [
-            state
-            .setInp(remainingInpFunc(state.inp))
-            .failure(
-              "unexpected token '%s' found at %s" % [
-                std.strReplace(formatTokenFunc(token), "'", "\\'"),
-                formatInpFunc(state.inp),
-              ]
-            ),
-          ]
+          models.newFailure(
+            "unexpected item '%s' found at %s" % [
+              std.strReplace(state.reader().formatItem(item), "'", "\\'"),
+              state.reader().formatPos(state.pos),
+            ]
+          )
       else
-        [
-          state
-          .setInp(remainingInpFunc(state.inp))
-          .failure('token not found at %s' % formatInpFunc(state.inp)),
-        ],
+        models.newFailure('item not found at %s' % state.reader().formatPos(state.pos)),
 
-  result(out)::
+  result(out, err=[])::
     function(state)
-      [
-        state
-        .success(out),
-      ],
+      models.newSuccess(out, err),
 
-  zero(err)::
+  zero(err=[])::
     function(state)
-      [
-        state
-        .failure(err),
-      ],
+      models.newFailure(err),
 }

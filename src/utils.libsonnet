@@ -1,19 +1,25 @@
 {
-  array:: {
-    head(arr)::
-      assert std.isArray(arr) : 'arr must be an array, got %s' % std.type(arr);
-      if std.length(arr) > 0 then
-        arr[0]
-      else
-        null,
+  head(x)::
+    assert std.isArray(x) || std.isString(x) : 'x must be an array or a string, got %s' % std.type(x);
+    if std.length(x) > 0 then
+      x[0]
+    else
+      null,
 
-    tail(arr)::
-      assert std.isArray(arr) : 'arr must be an array, got %s' % std.type(arr);
-      if std.length(arr) > 1 then
-        arr[1:std.length(arr)]
-      else
-        [],
-  },
+  tail(x)::
+    assert std.isArray(x) || std.isString(x) : 'x must be an array or a string, got %s' % std.type(x);
+    if std.length(x) > 1 then
+      x[1:std.length(x)]
+    else
+      [],
+
+  toArray(x)::
+    if std.isArray(x) then
+      x
+    else if x != null then
+      [x]
+    else
+      [],
 
   result:: {
     failures(results)::

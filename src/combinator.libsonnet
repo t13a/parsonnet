@@ -1,22 +1,31 @@
+local models = import 'models.libsonnet';
 local primitive = import 'primitive.libsonnet';
-local util = import 'util.libsonnet';
+local utils = import 'utils.libsonnet';
 
 {
   local combinator = self,
 
-  newBuilder(initParser):: {
-    parser:: initParser,
+  factory(builder=combinator.builder):: {
+    bind(parser, func):: builder(combinator.bind(parser, func)),
+    many(parser):: builder(combinator.many(parser)),
+    plus(lparser, rparser):: builder(combinator.plus(lparser, rparser)),
+    seq(lparser, rparser):: builder(combinator.seq(lparser, rparser)),
+    try(parser):: builder(combinator.try(parser)),
+  },
 
-    bind(func):: self { parser: combinator.bind(super.parser, func) },
-    many():: self { parser: combinator.many(super.parser) },
-    plus(parser):: self { parser: combinator.plus(super.parser, parser) },
-    seq(parser):: self { parser: combinator.seq(super.parser, parser) },
-    try():: self { parser: combinator.try(super.parser) },
+  builder(initParser):: {
+    apply:: initParser,
+
+    bind(func):: self { apply: combinator.bind(super.parser, func) },
+    many():: self { apply: combinator.many(super.parser) },
+    plus(parser):: self { apply: combinator.plus(super.parser, parser) },
+    seq(parser):: self { apply: combinator.seq(super.parser, parser) },
+    try():: self { apply: combinator.try(super.parser) },
   },
 
   bind(parser, func)::
     function(state)
-      util.result.successesOrFailures(std.flattenArrays(
+      utils.result.successesOrFailures(std.flattenArrays(
         [
           func(a)(a.remaining)
           for a in parser(state)
@@ -56,8 +65,8 @@ local util = import 'util.libsonnet';
   try(parser)::
     function(state)
       local a = parser(state);
-      if util.result.pred.successes(a) then
+      if utils.result.pred.successes(a) then
         a
       else
-        std.map(function(b) state.failure(b.err), a),
+        std.map(function(b) models.newFailure(b.err), a),
 }
