@@ -24,7 +24,7 @@ local util = import 'util.libsonnet';
       )),
 
   many(parser)::
-    local recurseUntilFailure(a) =
+    local applyUntilFailure(a) =
       if a.isSuccess() then
         if a.remaining.hasInp() then
           function(state)
@@ -34,7 +34,7 @@ local util = import 'util.libsonnet';
       else
         function(state)
           [];
-    self.bind(parser, recurseUntilFailure),
+    self.bind(parser, applyUntilFailure),
 
   plus(lparser, rparser)::
     local applyIfFailure(a) =
