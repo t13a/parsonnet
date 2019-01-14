@@ -1,31 +1,62 @@
 local combinator = import 'combinator.libsonnet';
-local models = import 'models.libsonnet';
+local debug = import 'debug.libsonnet';
+local model = import 'model.libsonnet';
 local primitive = import 'primitive.libsonnet';
-local utils = import 'utils.libsonnet';
+local util = import 'util.libsonnet';
 
 {
-  newReader(src)::
-    assert std.isString(src) : 'src must be a string, got %s' % std.type(src);
-    models.newReader() + {
-      initPos():: 0,
-      nextPos(pos):: if pos != null && self.hasItem(pos + 1) then pos + 1,
-      hasItem(pos):: pos != null && pos >= 0 && pos < std.length(src),
-      getItem(pos):: if self.hasItem(pos) then src[pos],
-    },
+  local char = self,
 
-  // Character
+  input:: {
+    new(src)::
+      assert std.isString(src) : 'src must be a string, got %s' % std.type(src);
+      model.input.new() +
+      {
+        initPos():: 0,
+        nextPos(pos):: if pos != null && self.hasItem(pos + 1) then pos + 1,
 
-  sat(func)::
-    assert std.isFunction(func) : 'func must be a function, got %s' % std.type(func);
-    primitive.item(func),
+        hasItem(pos):: pos != null && pos >= 0 && pos < std.length(src),
+        getItem(pos):: if self.hasItem(pos) then src[pos],
+      },
+  },
+
+  factory(builder=primitive.builder):: {
+    anyChar:: builder(char.anyChar),
+    char(c):: builder(char.char(c)),
+    oneOf(chars):: builder(char.oneOf(chars)),
+    noneOf(chars):: builder(char.noneOf(chars)),
+    sat(func):: builder(char.sat(func)),
+    string(str):: builder(char.string(str)),
+
+    // POSIX character classes
+
+    alnum:: builder(char.alnum),
+    alpha:: builder(char.alpha),
+    ascii:: builder(char.ascii),
+    blank:: builder(char.blank),
+    cntrl:: builder(char.cntrl),
+    digit:: builder(char.digit),
+    graph:: builder(char.graph),
+    lower:: builder(char.lower),
+    print:: builder(char.print),
+    punct:: builder(char.punct),
+    space:: builder(char.space),
+    upper:: builder(char.upper),
+    word:: builder(char.word),
+    xdigit:: builder(char.xdigit),
+  },
+
+  builder(initParser):: {
+    parser:: initParser,
+  },
 
   anyChar::
-    self.sat(function(item) true),
+    self.sat(function(item) std.isString(item) && std.length(item) == 1),
 
-  char(char)::
-    assert std.isString(char) : 'char must be a string, got %s' % std.type(char);
-    assert std.length(char) == 1 : 'char length must be equal to 1, got %d' % std.length(char);
-    self.sat(function(item) item == char),
+  char(c)::
+    assert std.isString(c) : 'c must be a string, got %s' % std.type(c);
+    assert std.length(c) == 1 : 'c length must be equal to 1, got %d' % std.length(c);
+    self.sat(function(item) item == c),
 
   oneOf(chars)::
     assert std.isString(chars) : 'chars must be a string, got %s' % std.type(chars);
@@ -37,15 +68,32 @@ local utils = import 'utils.libsonnet';
     assert std.length(chars) > 0 : 'chars length must be greater than 0, got %d' % std.length(chars);
     self.sat(function(item) !std.setMember(item, std.stringChars(chars))),
 
-  // String
+  sat(func)::
+    assert std.isFunction(func) : 'func must be a function, got %s' % std.type(func);
+    function(state)
+      local output = primitive.item(state);
+      if util.isSuccess(output) then
+        if func(util.outputValue(output)) then
+          output
+        else
+          debug.traceIfDebug(
+            state,
+            "unexpected item '%s' found at %s" % [
+              std.strReplace(state.input().formatItem(util.outputValue(output)), "'", "\\'"),
+              state.input().formatPos(state.pos),
+            ],
+            model.output.new()
+          )
+      else
+        output,
 
   string(str)::
     assert std.isString(str) : 'str must be a string, got %s' % std.type(str);
     assert std.length(str) >= 1 : 'str length must be greater than or equal to 1, got %d' % std.length(str);
     std.foldl(
-      function(p, c) combinator.seq(p, self.char(c)),
-      std.stringChars(utils.tail(str)),
-      self.char(utils.head(str))
+      function(p, c) combinator.plus(p, self.char(c)),
+      std.stringChars(util.tail(str)),
+      self.char(util.head(str))
     ),
 
   // POSIX character classes

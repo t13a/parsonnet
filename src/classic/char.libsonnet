@@ -1,4 +1,70 @@
+local combinator = import 'combinator.libsonnet';
+local models = import 'models.libsonnet';
+local primitive = import 'primitive.libsonnet';
+local utils = import 'utils.libsonnet';
+
 {
+  newReader(src)::
+    assert std.isString(src) : 'src must be a string, got %s' % std.type(src);
+    models.newReader() + {
+      initPos():: 0,
+      nextPos(pos):: if pos != null && self.hasInp(pos + 1) then pos + 1,
+      hasInp(pos):: pos != null && pos >= 0 && pos < std.length(src),
+      getInp(pos):: if self.hasInp(pos) then src[pos],
+    },
+
+  // Character
+
+  sat(func)::
+    assert std.isFunction(func) : 'func must be a function, got %s' % std.type(func);
+    primitive.item(func),
+
+  anyChar::
+    self.sat(function(inp) true),
+
+  char(char)::
+    assert std.isString(char) : 'char must be a string, got %s' % std.type(char);
+    assert std.length(char) == 1 : 'char length must be equal to 1, got %d' % std.length(char);
+    self.sat(function(inp) inp == char),
+
+  oneOf(chars)::
+    assert std.isString(chars) : 'chars must be a string, got %s' % std.type(chars);
+    assert std.length(chars) > 0 : 'chars length must be greater than 0, got %d' % std.length(chars);
+    self.sat(function(inp) std.setMember(inp, std.stringChars(chars))),
+
+  noneOf(chars)::
+    assert std.isString(chars) : 'chars must be a string, got %s' % std.type(chars);
+    assert std.length(chars) > 0 : 'chars length must be greater than 0, got %d' % std.length(chars);
+    self.sat(function(inp) !std.setMember(inp, std.stringChars(chars))),
+
+  // String
+
+  string(str)::
+    assert std.isString(str) : 'str must be a string, got %s' % std.type(str);
+    assert std.length(str) >= 1 : 'str length must be greater than or equal to 1, got %d' % std.length(str);
+    std.foldl(
+      function(p, c) combinator.seq(p, self.char(c)),
+      std.stringChars(utils.tail(str)),
+      self.char(utils.head(str))
+    ),
+
+  // POSIX character classes
+
+  alnum:: self.sat(self.isAlnum),
+  alpha:: self.sat(self.isAlpha),
+  ascii:: self.sat(self.isAscii),
+  blank:: self.sat(self.isBlank),
+  cntrl:: self.sat(self.isCntrl),
+  digit:: self.sat(self.isDigit),
+  graph:: self.sat(self.isGraph),
+  lower:: self.sat(self.isLower),
+  print:: self.sat(self.isPrint),
+  punct:: self.sat(self.isPunct),
+  space:: self.sat(self.isSpace),
+  upper:: self.sat(self.isUpper),
+  word:: self.sat(self.isWord),
+  xdigit:: self.sat(self.isXdigit),
+
   local testCodepoint(func) = function(c) func(std.codepoint(c)),
 
   isAlnum(c):: testCodepoint(self.codepoint.isAlnum),
