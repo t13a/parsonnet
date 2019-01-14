@@ -13,9 +13,12 @@ TODO
 - Documentation
 - Implement combinators
 - Implement builtin parsers
-    - Character
-    - JSON
-    - JSONPath
+    - Character parser
+    - JSON object parser
+    - JSONPath parser
+    - JSONPath selecter
+- Consideration of stack overflow
+    - parsing of 100 characters exceeds max stack frame :-(
 - Consideration of performance efficiency
 
 ## References

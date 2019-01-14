@@ -1,6 +1,5 @@
-local models = import 'models.libsonnet';
+local model = import 'models.libsonnet';
 local primitive = import 'primitive.libsonnet';
-local utils = import 'utils.libsonnet';
 
 {
   local combinator = self,
