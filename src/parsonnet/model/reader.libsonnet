@@ -6,7 +6,7 @@
     hasItem(state):: error 'not implemented yet',
     getItem(state):: error 'not implemented yet',
 
-    formatState(state):: std.toString(state),
-    formatItem(item):: std.toString(item),
+    formatState(state):: error 'not implemented yet',
+    formatItem(item):: error 'not implemented yet',
   },
 }

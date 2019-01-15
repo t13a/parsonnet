@@ -25,37 +25,44 @@ local util = import 'util.libsonnet';
 
         hasItem(state):: hasPos(state.pos),
         getItem(state):: if hasPos(state.pos) then src[state.pos],
+
+        formatState(state):: if hasPos(state.pos) then std.toString(state.pos) else 'end',
+        formatItem(item):: std.toString(item),
       },
   },
 
-  factory(builder=primitive.builder):: {
-    anyChar:: builder(char.anyChar),
-    char(c):: builder(char.char(c)),
-    oneOf(chars):: builder(char.oneOf(chars)),
-    noneOf(chars):: builder(char.noneOf(chars)),
-    sat(func):: builder(char.sat(func)),
-    string(str):: builder(char.string(str)),
+  factory:: {
+    new(builder=primitive.builder):: {
+      anyChar:: builder(char.anyChar),
+      char(c):: builder(char.char(c)),
+      oneOf(chars):: builder(char.oneOf(chars)),
+      noneOf(chars):: builder(char.noneOf(chars)),
+      sat(func):: builder(char.sat(func)),
+      string(str):: builder(char.string(str)),
 
-    // POSIX character classes
+      // POSIX character classes
 
-    alnum:: builder(char.alnum),
-    alpha:: builder(char.alpha),
-    ascii:: builder(char.ascii),
-    blank:: builder(char.blank),
-    cntrl:: builder(char.cntrl),
-    digit:: builder(char.digit),
-    graph:: builder(char.graph),
-    lower:: builder(char.lower),
-    print:: builder(char.print),
-    punct:: builder(char.punct),
-    space:: builder(char.space),
-    upper:: builder(char.upper),
-    word:: builder(char.word),
-    xdigit:: builder(char.xdigit),
+      alnum:: builder(char.alnum),
+      alpha:: builder(char.alpha),
+      ascii:: builder(char.ascii),
+      blank:: builder(char.blank),
+      cntrl:: builder(char.cntrl),
+      digit:: builder(char.digit),
+      graph:: builder(char.graph),
+      lower:: builder(char.lower),
+      print:: builder(char.print),
+      punct:: builder(char.punct),
+      space:: builder(char.space),
+      upper:: builder(char.upper),
+      word:: builder(char.word),
+      xdigit:: builder(char.xdigit),
+    },
   },
 
-  builder(initParser):: {
-    parser:: initParser,
+  builder:: {
+    new(initParser):: {
+      parser:: initParser,
+    },
   },
 
   anyChar::
@@ -79,21 +86,21 @@ local util = import 'util.libsonnet';
   sat(func)::
     assert std.isFunction(func) : 'func must be a function, got %s' % std.type(func);
     function(state)
-      local output = primitive.item(state);
-      if util.isSuccess(output) then
-        if func(util.outputValue(output)) then
-          output
+      local writer = primitive.item(state);
+      if util.isSuccess(writer) then
+        if func(util.writerResultValue(writer)) then
+          writer
         else
           debug.traceIfDebug(
             state,
             "unexpected item '%s' found at %s" % [
-              std.strReplace(state.reader().formatItem(util.outputValue(output)), "'", "\\'"),
+              std.strReplace(state.reader().formatItem(util.writerValue(writer)), "'", "\\'"),
               state.reader().formatState(state),
             ],
-            model.output.new()
+            model.writer.new()
           )
       else
-        output,
+        writer,
 
   string(str)::
     assert std.isString(str) : 'str must be a string, got %s' % std.type(str);

@@ -63,38 +63,42 @@
     else
       [],
 
-  // Output
+  // Writer
 
-  isFailure(output)::
-    !self.isSuccess(output),
+  cok(writer):: self.isConsumed(writer) && self.isSuccess(writer),
+  cerr(writer):: self.isConsumed(writer) && self.isFailure(writer),
+  eok(writer):: self.isUnconsumed(writer) && self.isSuccess(writer),
+  eerr(writer):: self.isUnconsumed(writer) && self.isFailure(writer),
 
-  isSuccess(output)::
-    assert std.isArray(output) : 'output must be an array, got %s' % std.type(output);
-    std.length(output) > 0,
+  isConsumed(writer)::
+    !self.isUnconsumed(writer),
 
-  outputState(output)::
-    assert std.isArray(output) : 'output must be an array, got %s' % std.type(output);
-    assert std.length(output) == 1 : 'output length must be 1, got %s' % std.length(output);
-    output[0].state,
+  isUnconsumed(writer)::
+    assert std.isObject(writer) : 'writer must be an object, got %s' % std.type(writer);
+    std.length(writer.results) == 0
+    || (
+      std.length(writer.results) == 1
+      && std.isArray(writer.results[0])
+      && std.length(writer.results[0]) == 0
+    ),
 
-  outputStates(output)::
-    assert std.isArray(output) : 'output must be an array, got %s' % std.type(output);
-    std.map(self.resultState, output),
+  isSuccess(writer)::
+    assert std.isObject(writer) : 'writer must be an object, got %s' % std.type(writer);
+    std.length(writer.results) > 0,
 
-  outputValue(output)::
-    assert std.isArray(output) : 'output must be an array, got %s' % std.type(output);
-    assert std.length(output) == 1 : 'output length must be 1, got %s' % std.length(output);
-    output[0].value,
+  isFailure(writer)::
+    !self.isFailure(writer),
 
-  outputValues(output)::
-    assert std.isArray(output) : 'output must be an array, got %s' % std.type(output);
-    std.map(self.resultValue, output),
+  writerResultValue(writer)::
+    assert std.isObject(writer) : 'writer must be an object, got %s' % std.type(writer);
+    assert std.length(writer) == 1 : 'writer length must be 1, got %s' % std.length(writer);
+    writer[0].value,
+
+  writerResultValues(writer)::
+    assert std.isObject(writer) : 'writer must be an object, got %s' % std.type(writer);
+    std.map(self.resultValue, writer.results),
 
   // Result
-
-  resultState(result)::
-    assert std.isObject(result) : 'result must be an object, got %s' % std.type(result);
-    result.state,
 
   resultValue(result)::
     assert std.isObject(result) : 'result must be an object, got %s' % std.type(result);

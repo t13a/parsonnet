@@ -5,14 +5,19 @@ local model = import 'model.libsonnet';
   local primitive = self,
   local any(x) = true,
 
-  factory(builder=primitive.builder):: {
-    item:: builder(primitive.item),
-    result(value):: builder(primitive.result(value)),
-    zero:: builder(primitive.zero),
+  factory:: {
+    new(builder=primitive.builder):: {
+      item:: builder(primitive.item),
+      pure(results=[]):: builder(primitive.pure(results)),
+      result(value=[]):: builder(primitive.result(value)),
+      zero:: builder(primitive.zero),
+    },
   },
 
-  builder(initParser):: {
-    parser:: initParser,
+  builder:: {
+    new(initParser):: {
+      parser:: initParser,
+    },
   },
 
   // item :: Parser Char
@@ -22,9 +27,7 @@ local model = import 'model.libsonnet';
   item::
     function(state)
       if state.reader().hasItem(state) then
-        local x = state.reader().getItem(state);
-        local xs = state.next();
-        model.writer.new(model.result.new(x, xs))
+        model.writer.new([model.result.new(state.reader().getItem(state), state.next())])
       else
         debug.traceIfDebug(
           state,
@@ -32,11 +35,15 @@ local model = import 'model.libsonnet';
           model.writer.new()
         ),
 
+  pure(results=[])::
+    function(state)
+      model.writer.new(results),
+
   // result  :: a -> Parser a
   // result v = \inp -> [(v,inp)]
-  result(value)::
+  result(value=[])::
     function(state)
-      model.writer.new(model.result.new(value, state)),
+      model.writer.new([model.result.new(value, state)]),
 
   // zero :: Parser a
   // zero  = \inp -> []

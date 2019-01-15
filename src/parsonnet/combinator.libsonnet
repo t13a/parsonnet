@@ -5,25 +5,29 @@ local util = import 'util.libsonnet';
 {
   local combinator = self,
 
-  factory(mapFunc=combinator.builder)::
-    local e = util.extract;
-    util.factory(mapFunc) +
-    {
-      bind(p, f):: self.__map(combinator.bind(e(p), f)),
-      many(p):: self.__map(combinator.many(e(p))),
-      plus(p, q):: self.__map(combinator.plus(e(p), e(q))),
-      seq(p, q):: self.__map(combinator.seq(e(p), e(q))),
-    },
+  factory:: {
+    new(mapFunc=combinator.builder)::
+      local e = util.extract;
+      util.factory(mapFunc) +
+      {
+        bind(p, f):: self.__map(combinator.bind(e(p), f)),
+        many(p):: self.__map(combinator.many(e(p))),
+        plus(p, q):: self.__map(combinator.plus(e(p), e(q))),
+        seq(p, q):: self.__map(combinator.seq(e(p), e(q))),
+      },
+  },
 
-  builder(initParser)::
-    local e = util.extract;
-    util.builder(initParser) +
-    {
-      bind(f):: self.__with(combinator.bind(self.parser, f)),
-      many:: self.__with(combinator.many(self.parser)),
-      plus(q):: self.__with(combinator.plus(self.parser, e(q))),
-      seq(q):: self.__with(combinator.seq(self.parser, e(q))),
-    },
+  builder:: {
+    new(initParser)::
+      local e = util.extract;
+      util.builder(initParser) +
+      {
+        bind(f):: self.__with(combinator.bind(self.parser, f)),
+        many:: self.__with(combinator.many(self.parser)),
+        plus(q):: self.__with(combinator.plus(self.parser, e(q))),
+        seq(q):: self.__with(combinator.seq(self.parser, e(q))),
+      },
+  },
 
   // bind      :: Parser a -> (a -> Parser b) -> Parser b
   // p 'bind' f = \inp -> concat [f v inp' | (v,inp') <- p inp]
@@ -33,27 +37,36 @@ local util = import 'util.libsonnet';
     assert std.isFunction(func) :
            'func must be an function, got %s' % std.type(func);
     function(state)
-      std.flattenArrays(
+      local bs = std.flattenArrays(
         [
-          func(a)(a.state)
-          for a in parser(state)
+          func(a)(a.state).results
+          for a in parser(state).results
         ]
-      ),
-
-  local manyAccum(p, s, a=[]) =
-    local b = p(s);
-    if util.isSuccess(b) then
-      manyAccum(p, util.last(b).state, a + b) tailstrict
-    else
-      a,
+      );
+      if std.length(bs) > 0 then
+        local v = std.map(util.resultValue, bs);
+        local s = util.last(bs).state;
+        model.writer.new([model.result.new(v, s)])
+      else
+        model.writer.new(),
 
   // many  :: Parser a -> Parser [a]
   // many p = [x:xs | x <- p, xs <- many p] ++ [[]]
   many(parser)::
     assert std.isFunction(parser) :
            'parser must be an function, got %s' % std.type(parser);
+    local accum(p, s, v=[]) =
+      local b = p(s);
+      if util.isSuccess(b) then
+        accum(
+          p,
+          util.last(b.results).state,
+          v + std.map(util.resultValue, b.results)
+        ) tailstrict
+      else
+        model.result.new(v, s);
     function(state)
-      manyAccum(parser, state),  // FIXME success even if empty
+      model.writer.new([accum(parser, state)]),
 
   // plus :: Parser a -> Parser a -> Parser a
   // p 'plus' q = \inp -> (p inp ++ q inp)
@@ -79,8 +92,7 @@ local util = import 'util.libsonnet';
         self.bind(
           parser2,
           function(b)
-            function(state)  // XXX result
-              model.writer.new(model.result.new([a] + [b], b.state))
+            primitive.pure([a, b])
         )
     ),
 }
