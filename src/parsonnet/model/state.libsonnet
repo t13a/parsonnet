@@ -1,12 +1,7 @@
 {
-  new(input)::
-    local initPos = input.initPos();
+  new(reader)::
     {
-      pos: initPos,
-
-      input():: input,
-      next()::
-        local nextPos = self.input().nextPos(self.pos);
-        self { pos: nextPos },
+      next():: reader.nextState(self),
+      reader():: reader,
     },
 }

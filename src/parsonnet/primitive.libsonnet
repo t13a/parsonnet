@@ -21,14 +21,14 @@ local model = import 'model.libsonnet';
   //                    (x:xs) -> [(x,xs)]
   item::
     function(state)
-      if state.input().hasItem(state.pos) then
-        local x = state.input().getItem(state.pos);
+      if state.reader().hasItem(state) then
+        local x = state.reader().getItem(state);
         local xs = state.next();
         model.output.new(model.result.new(x, xs))
       else
         debug.traceIfDebug(
           state,
-          'item not found at %s' % state.input().formatPos(state.pos),
+          'item not found at %s' % state.reader().formatState(state),
           model.output.new()
         ),
 

@@ -7,16 +7,24 @@ local util = import 'util.libsonnet';
 {
   local char = self,
 
-  input:: {
+  reader:: {
     new(src)::
       assert std.isString(src) : 'src must be a string, got %s' % std.type(src);
-      model.input.new() +
+      local hasPos(pos, offsetPos=0) =
+        pos != null
+        && pos + offsetPos >= 0
+        && pos + offsetPos < std.length(src);
+      model.reader.new() +
       {
-        initPos():: 0,
-        nextPos(pos):: if pos != null && self.hasItem(pos + 1) then pos + 1,
+        initState():: model.state.new(self) { pos: 0 },
+        nextState(state)::
+          // binding local variable on outside the object is
+          // VERY important to save stack frames
+          local nextPos = if hasPos(state.pos, 1) then state.pos + 1;
+          state { pos: nextPos },
 
-        hasItem(pos):: pos != null && pos >= 0 && pos < std.length(src),
-        getItem(pos):: if self.hasItem(pos) then src[pos],
+        hasItem(state):: hasPos(state.pos),
+        getItem(state):: if hasPos(state.pos) then src[state.pos],
       },
   },
 
@@ -79,8 +87,8 @@ local util = import 'util.libsonnet';
           debug.traceIfDebug(
             state,
             "unexpected item '%s' found at %s" % [
-              std.strReplace(state.input().formatItem(util.outputValue(output)), "'", "\\'"),
-              state.input().formatPos(state.pos),
+              std.strReplace(state.reader().formatItem(util.outputValue(output)), "'", "\\'"),
+              state.reader().formatState(state),
             ],
             model.output.new()
           )
