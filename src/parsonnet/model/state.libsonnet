@@ -1,8 +1,8 @@
 {
-  new(reader)::
-    assert std.isObject(reader) : 'reader must be an object, got %s' % std.type(reader);
+  new(input)::
+    assert std.isObject(input) : 'input must be an object, got %s' % std.type(input);
     {
-      next():: reader.nextState(self),
-      reader():: reader,
+      next():: input.nextState(self),
+      input():: input,
     },
 }

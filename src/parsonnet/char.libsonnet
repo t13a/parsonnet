@@ -7,14 +7,14 @@ local util = import 'util.libsonnet';
 {
   local char = self,
 
-  reader:: {
+  input:: {
     new(src)::
       assert std.isString(src) : 'src must be a string, got %s' % std.type(src);
       local hasPos(pos, offsetPos=0) =
         pos != null
         && pos + offsetPos >= 0
         && pos + offsetPos < std.length(src);
-      model.reader.new() +
+      model.input.new() +
       {
         initState():: model.state.new(self) { pos: 0 },
         nextState(state)::
@@ -86,21 +86,21 @@ local util = import 'util.libsonnet';
   sat(func)::
     assert std.isFunction(func) : 'func must be a function, got %s' % std.type(func);
     function(state)
-      local writer = primitive.item(state);
-      if util.isSuccess(writer) then
-        if func(util.writerResultValue(writer)) then
-          writer
+      local output = primitive.item(state);
+      if util.isSuccess(output) then
+        if func(util.outputResultValue(output)) then
+          output
         else
           debug.traceIfDebug(
             state,
             "unexpected item '%s' found at %s" % [
-              std.strReplace(state.reader().formatItem(util.writerValue(writer)), "'", "\\'"),
-              state.reader().formatState(state),
+              std.strReplace(state.input().formatItem(util.outputValue(output)), "'", "\\'"),
+              state.input().formatState(state),
             ],
-            model.writer.new()
+            model.output.new()
           )
       else
-        writer,
+        output,
 
   string(str)::
     assert std.isString(str) : 'str must be a string, got %s' % std.type(str);

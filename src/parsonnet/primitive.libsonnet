@@ -26,28 +26,28 @@ local model = import 'model.libsonnet';
   //                    (x:xs) -> [(x,xs)]
   item::
     function(state)
-      if state.reader().hasItem(state) then
-        model.writer.new([model.result.new(state.reader().getItem(state), state.next())])
+      if state.input().hasItem(state) then
+        model.output.new([model.result.new(state.input().getItem(state), state.next())])
       else
         debug.traceIfDebug(
           state,
-          'item not found at %s' % state.reader().formatState(state),
-          model.writer.new()
+          'item not found at %s' % state.input().formatState(state),
+          model.output.new()
         ),
 
   pure(results=[])::
     function(state)
-      model.writer.new(results),
+      model.output.new(results),
 
   // result  :: a -> Parser a
   // result v = \inp -> [(v,inp)]
   result(value=[])::
     function(state)
-      model.writer.new([model.result.new(value, state)]),
+      model.output.new([model.result.new(value, state)]),
 
   // zero :: Parser a
   // zero  = \inp -> []
   zero::
     function(state)
-      model.writer.new(),
+      model.output.new(),
 }

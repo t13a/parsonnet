@@ -1,7 +1,7 @@
 {
-  reader:: import 'model/reader.libsonnet',
+  input:: import 'model/input.libsonnet',
   state:: import 'model/state.libsonnet',
 
-  writer:: import 'model/writer.libsonnet',
+  output:: import 'model/output.libsonnet',
   result:: import 'model/result.libsonnet',
 }

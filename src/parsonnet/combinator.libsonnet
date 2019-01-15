@@ -46,9 +46,9 @@ local util = import 'util.libsonnet';
       if std.length(bs) > 0 then
         local v = std.map(util.resultValue, bs);
         local s = util.last(bs).state;
-        model.writer.new([model.result.new(v, s)])
+        model.output.new([model.result.new(v, s)])
       else
-        model.writer.new(),
+        model.output.new(),
 
   // many  :: Parser a -> Parser [a]
   // many p = [x:xs | x <- p, xs <- many p] ++ [[]]
@@ -66,7 +66,7 @@ local util = import 'util.libsonnet';
       else
         model.result.new(v, s);
     function(state)
-      model.writer.new([accum(parser, state)]),
+      model.output.new([accum(parser, state)]),
 
   // plus :: Parser a -> Parser a -> Parser a
   // p 'plus' q = \inp -> (p inp ++ q inp)
