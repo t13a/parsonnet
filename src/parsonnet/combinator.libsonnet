@@ -80,7 +80,7 @@ local util = import 'util.libsonnet';
           parser2,
           function(b)
             function(state)  // XXX result
-              model.output.new(model.result.new([a] + [b], b.state))
+              model.writer.new(model.result.new([a] + [b], b.state))
         )
     ),
 }

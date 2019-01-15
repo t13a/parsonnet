@@ -24,23 +24,23 @@ local model = import 'model.libsonnet';
       if state.reader().hasItem(state) then
         local x = state.reader().getItem(state);
         local xs = state.next();
-        model.output.new(model.result.new(x, xs))
+        model.writer.new(model.result.new(x, xs))
       else
         debug.traceIfDebug(
           state,
           'item not found at %s' % state.reader().formatState(state),
-          model.output.new()
+          model.writer.new()
         ),
 
   // result  :: a -> Parser a
   // result v = \inp -> [(v,inp)]
   result(value)::
     function(state)
-      model.output.new(model.result.new(value, state)),
+      model.writer.new(model.result.new(value, state)),
 
   // zero :: Parser a
   // zero  = \inp -> []
   zero::
     function(state)
-      model.output.new(),
+      model.writer.new(),
 }
