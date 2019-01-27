@@ -125,34 +125,31 @@ local util = import 'util.libsonnet';
         b,
 
   sepBy(parser, sepParser)::
-    assert std.isFunction(parser) :
-           'parser must be an function, got %s' % std.type(parser);
-    assert std.isFunction(sepParser) :
-           'sepParser must be an function, got %s' % std.type(sepParser);
     self.plus(self.sepBy1(parser, sepParser), primitive.result()),
 
   sepBy1(parser, sepParser)::
-    assert std.isFunction(parser) :
-           'parser must be an function, got %s' % std.type(parser);
-    assert std.isFunction(sepParser) :
-           'sepParser must be an function, got %s' % std.type(sepParser);
-    function(state)
-      local a = parser(state);
-      local b = self.many(self.bind(
-        sepParser,
-        function(a)
-          self.bind(
-            parser,
-            function(b)
-              primitive.result(b.value)
-          )
-      ))(util.last(a.results).state);
-      if util.isSuccess(a) && util.isSuccess(b) then
-        local avs = util.outputResultValues(a);
-        local bvs = std.flattenArrays(util.outputResultValues(b));
-        model.output.new([model.result.new(avs + bvs, util.last(b.results).state)])
-      else
-        model.output.new(),
+    self.bind(
+      parser,
+      function(a)
+        self.bind(
+          self.many(
+            self.bind(
+              sepParser,
+              function(b)
+                self.bind(
+                  parser,
+                  function(c)
+                    primitive.result(c.value)
+                )
+            )
+          ),
+          function(b)
+            if util.isConsumed(b) then
+              primitive.result([a.value, std.flattenArrays(b.value)])
+            else
+              primitive.result([a.value])
+        )
+    ),
 
   // seq      :: Parser a -> Parser b -> Parser (a,b)
   // p 'seq' q = \inp -> [((v,w),inp'') | (v,inp')  <- p inp

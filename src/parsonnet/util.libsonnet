@@ -70,17 +70,12 @@
   eok(output):: self.isUnconsumed(output) && self.isSuccess(output),
   eerr(output):: self.isUnconsumed(output) && self.isFailure(output),
 
-  isConsumed(output)::
-    !self.isUnconsumed(output),
+  isConsumed(result)::
+    !self.isUnconsumed(result),
 
-  isUnconsumed(output)::
-    assert std.isObject(output) : 'output must be an object, got %s' % std.type(output);
-    std.length(output.results) == 0
-    || (
-      std.length(output.results) == 1
-      && std.isArray(output.results[0])
-      && std.length(output.results[0]) == 0
-    ),
+  isUnconsumed(result)::
+    assert std.isObject(result) : 'result must be an object, got %s' % std.type(result);
+    std.isArray(result.value) && std.length(result.value) == 0,
 
   isSuccess(output)::
     assert std.isObject(output) : 'output must be an object, got %s' % std.type(output);
