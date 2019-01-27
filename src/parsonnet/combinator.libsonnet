@@ -107,9 +107,18 @@ local util = import 'util.libsonnet';
       else
         b,
 
+  sepBy(parser, sepParser)::
+    assert std.isFunction(parser) :
+           'parser must be an function, got %s' % std.type(parser);
+    assert std.isFunction(sepParser) :
+           'sepParser must be an function, got %s' % std.type(sepParser);
+    self.plus(self.sepBy1(parser, sepParser), primitive.result()),
+
   sepBy1(parser, sepParser)::
     assert std.isFunction(parser) :
            'parser must be an function, got %s' % std.type(parser);
+    assert std.isFunction(sepParser) :
+           'sepParser must be an function, got %s' % std.type(sepParser);
     function(state)
       local a = parser(state);
       local b = self.many(self.bind(

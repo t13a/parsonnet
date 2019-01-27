@@ -85,6 +85,25 @@ local testPlus = {
   },
 };
 
+local testSepBy = {
+  test1: {
+    local p = combinator.sepBy(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('')),
+    value: std.assertEqual(p.results[0].value, []),
+    statePos: std.assertEqual(p.results[0].state.pos, 0),
+  },
+  test2: {
+    local p = combinator.sepBy(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc')),
+    value: std.assertEqual(p.results[0].value, [['a', 'b', 'c']]),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+};
+
 local testSepBy1 = {
   test1: {
     local p = combinator.sepBy1(
@@ -137,6 +156,7 @@ local testSeq = {
   testMany1: testMany1,
   testOptional: testOptional,
   testPlus: testPlus,
+  testSepBy: testSepBy,
   testSepBy1: testSepBy1,
   testSeq: testSeq,
 }
