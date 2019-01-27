@@ -10,7 +10,7 @@ local util = import 'util.libsonnet';
       local e = util.extract;
       util.factory(mapFunc) +
       {
-        bind(p, f):: self.__map(combinator.bind(e(p), f)),
+        bind(p, f):: self.__map(combinator.bind(e(p), function(a) e(f(a)))),
         endBy(p, sep):: self.__map(combinator.endBy(e(p), e(p))),
         many(p):: self.__map(combinator.many(e(p))),
         many1(p):: self.__map(combinator.many1(e(p))),
@@ -27,7 +27,7 @@ local util = import 'util.libsonnet';
       local e = util.extract;
       util.builder(initParser) +
       {
-        bind(f):: self.__with(combinator.bind(self.parser, f)),
+        bind(f):: self.__with(combinator.bind(self.parser, function(a) e(f(a)))),
         endBy(seq):: self.__with(combinator.endBy(self.parser, e(seq))),
         many:: self.__with(combinator.many(self.parser)),
         many1:: self.__with(combinator.many1(self.parser)),

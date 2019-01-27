@@ -95,7 +95,7 @@ local util = import 'util.libsonnet';
           debug.traceIfDebug(
             state,
             "unexpected item '%s' found at %s" % [
-              std.strReplace(state.input().formatItem(util.outputValue(output)), "'", "\\'"),
+              std.strReplace(state.input().formatItem(util.outputResultValue(output)), "'", "\\'"),
               state.input().formatState(state),
             ],
             model.output.new()
