@@ -50,6 +50,23 @@ local util = import 'util.libsonnet';
       else
         model.output.new(),
 
+  endBy(parser, sepParser)::
+    assert std.isFunction(parser) :
+           'parser must be an function, got %s' % std.type(parser);
+    assert std.isFunction(sepParser) :
+           'sepParser must be an function, got %s' % std.type(sepParser);
+    self.many(
+      self.bind(
+        parser,
+        function(a)
+          self.bind(
+            sepParser,
+            function(b)
+              primitive.result(a.value)
+          )
+      )
+    ),
+
   optional(parser)::
     assert std.isFunction(parser) :
            'parser must be an function, got %s' % std.type(parser);

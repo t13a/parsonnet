@@ -30,6 +30,41 @@ local testBind = {
   },
 };
 
+local testEndBy = {
+  test1: {
+    local p = combinator.endBy(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('')),
+    value: std.assertEqual(p.results[0].value, []),
+    statePos: std.assertEqual(p.results[0].state.pos, 0),
+  },
+  test2: {
+    local p = combinator.endBy(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc')),
+    value: std.assertEqual(p.results[0].value, []),
+    statePos: std.assertEqual(p.results[0].state.pos, 0),
+  },
+  test3: {
+    local p = combinator.endBy(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc,')),
+    value: std.assertEqual(p.results[0].value, [['a', 'b', 'c']]),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+  test4: {
+    local p = combinator.endBy(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc,def,')),
+    value: std.assertEqual(p.results[0].value, [['a', 'b', 'c'], ['d', 'e', 'f']]),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+};
+
 local testMany = {
   test1: {
     local p = combinator.many(char.char('a'))(s('')),
@@ -152,6 +187,7 @@ local testSeq = {
 
 {
   testBind: testBind,
+  testEndBy: testEndBy,
   testMany: testMany,
   testMany1: testMany1,
   testOptional: testOptional,
