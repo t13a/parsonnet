@@ -11,6 +11,7 @@ local util = import 'util.libsonnet';
       local e = util.extract;
       util.factory(mapFunc) +
       {
+        fail(msg):: self.__map(primitive.fail(msg)),
         item:: self.__map(primitive.item),
         pure(results=[]):: self.__map(primitive.pure(results)),
         result(value=[]):: self.__map(primitive.result(value)),
@@ -21,6 +22,12 @@ local util = import 'util.libsonnet';
   builder:: {
     new(initParser):: util.builder(initParser),
   },
+
+  fail(msg)::
+    assert std.isString(msg) :
+           'msg must be a string, got %s' % std.type(msg);
+    function(state)
+      std.traceIfDebug(msg, model.output.new()),
 
   // item :: Parser Char
   // item  = \inp -> case inp of
