@@ -43,6 +43,65 @@ local testMany = {
   },
 };
 
+local testMany1 = {
+  test1: {
+    local p = combinator.many1(char.char('a'))(s('')),
+    failure: std.assertEqual(util.isFailure(p), true),
+  },
+  test2: {
+    local p = combinator.many1(char.char('a'))(s('aaabbb')),
+    value: std.assertEqual(p.results[0].value, ['a', 'a', 'a']),
+    statePos: std.assertEqual(p.results[0].state.pos, 3),
+  },
+};
+
+local testOptional = {
+  test1: {
+    local p = combinator.optional(char.anyChar)(s('')),
+    value: std.assertEqual(p.results[0].value, []),
+    statePos: std.assertEqual(p.results[0].state.pos, 0),
+  },
+  test2: {
+    local p = combinator.optional(char.anyChar)(s('a')),
+    value: std.assertEqual(p.results[0].value, 'a'),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+};
+
+local testSepBy1 = {
+  test1: {
+    local p = combinator.sepBy1(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('')),
+    failure: std.assertEqual(util.isFailure(p), true),
+  },
+  test2: {
+    local p = combinator.sepBy1(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc')),
+    value: std.assertEqual(p.results[0].value, [['a', 'b', 'c']]),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+  test3: {
+    local p = combinator.sepBy1(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc,def')),
+    value: std.assertEqual(p.results[0].value, [['a', 'b', 'c'], ['d', 'e', 'f']]),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+  test4: {
+    local p = combinator.sepBy1(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc,def,')),
+    value: std.assertEqual(p.results[0].value, [['a', 'b', 'c'], ['d', 'e', 'f']]),
+    statePos: std.assertEqual(p.results[0].state.pos, 7),
+  },
+};
+
 local testSeq = {
   test1: {
     local p = combinator.seq(char.anyChar, char.anyChar)(s('a')),
@@ -58,5 +117,8 @@ local testSeq = {
 {
   testBind: testBind,
   testMany: testMany,
+  testMany1: testMany1,
+  testOptional: testOptional,
+  testSepBy1: testSepBy1,
   testSeq: testSeq,
 }

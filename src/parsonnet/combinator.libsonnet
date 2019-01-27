@@ -50,6 +50,16 @@ local util = import 'util.libsonnet';
       else
         model.output.new(),
 
+  optional(parser)::
+    assert std.isFunction(parser) :
+           'parser must be an function, got %s' % std.type(parser);
+    function(state)
+      local a = parser(state);
+      if util.isSuccess(a) then
+        a
+      else
+        model.output.new([model.result.new([], state)]),
+
   // many  :: Parser a -> Parser [a]
   // many p = [x:xs | x <- p, xs <- many p] ++ [[]]
   many(parser)::
@@ -68,6 +78,20 @@ local util = import 'util.libsonnet';
     function(state)
       model.output.new([accum(parser, state)]),
 
+  many1(parser)::
+    assert std.isFunction(parser) :
+           'parser must be an function, got %s' % std.type(parser);
+    function(state)
+      local a = parser(state);
+      local b = self.many(parser)(util.last(a.results).state);
+      if util.isSuccess(a) then
+        local avs = util.outputResultValues(a);
+        local bvs = std.flattenArrays(util.outputResultValues(b));
+        local bs = util.last(b.results).state;
+        model.output.new([model.result.new(avs + bvs, bs)])
+      else
+        model.output.new(),
+
   // plus :: Parser a -> Parser a -> Parser a
   // p 'plus' q = \inp -> (p inp ++ q inp)
   plus(parser1, parser2)::
@@ -77,6 +101,27 @@ local util = import 'util.libsonnet';
            'parser2 must be an function, got %s' % std.type(parser2);
     function(state)
       parser1(state) + parser2(state),
+
+  sepBy1(parser, sepParser)::
+    assert std.isFunction(parser) :
+           'parser must be an function, got %s' % std.type(parser);
+    function(state)
+      local a = parser(state);
+      local b = self.many(self.bind(
+        sepParser,
+        function(a)
+          self.bind(
+            parser,
+            function(b)
+              primitive.result(b.value)
+          )
+      ))(util.last(a.results).state);
+      if util.isSuccess(a) && util.isSuccess(b) then
+        local avs = util.outputResultValues(a);
+        local bvs = std.flattenArrays(util.outputResultValues(b));
+        model.output.new([model.result.new(avs + bvs, util.last(b.results).state)])
+      else
+        model.output.new(),
 
   // seq      :: Parser a -> Parser b -> Parser (a,b)
   // p 'seq' q = \inp -> [((v,w),inp'') | (v,inp')  <- p inp
