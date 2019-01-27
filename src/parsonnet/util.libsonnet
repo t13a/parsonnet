@@ -87,12 +87,12 @@
     std.length(output.results) > 0,
 
   isFailure(output)::
-    !self.isFailure(output),
+    !self.isSuccess(output),
 
   outputResultValue(output)::
     assert std.isObject(output) : 'output must be an object, got %s' % std.type(output);
     assert std.length(output) == 1 : 'output length must be 1, got %s' % std.length(output);
-    output[0].value,
+    output.results[0].value,
 
   outputResultValues(output)::
     assert std.isObject(output) : 'output must be an object, got %s' % std.type(output);

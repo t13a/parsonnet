@@ -44,9 +44,9 @@ local util = import 'util.libsonnet';
         ]
       );
       if std.length(bs) > 0 then
-        local v = std.map(util.resultValue, bs);
+        local vs = std.map(util.resultValue, bs);
         local s = util.last(bs).state;
-        model.output.new([model.result.new(v, s)])
+        model.output.new(std.map(function(v) model.result.new(v, s), vs))
       else
         model.output.new(),
 
@@ -92,7 +92,7 @@ local util = import 'util.libsonnet';
         self.bind(
           parser2,
           function(b)
-            primitive.pure([a, b])
+            primitive.result([a.value, b.value])
         )
     ),
 }

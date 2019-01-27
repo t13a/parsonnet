@@ -106,7 +106,15 @@ local util = import 'util.libsonnet';
     assert std.isString(str) : 'str must be a string, got %s' % std.type(str);
     assert std.length(str) >= 1 : 'str length must be greater than or equal to 1, got %d' % std.length(str);
     std.foldl(
-      function(p, c) combinator.plus(p, self.char(c)),
+      function(p, c)
+        combinator.bind(
+          p,
+          function(a) combinator.bind(
+            self.char(c),
+            function(b)
+              primitive.result(a.value + b.value)
+          )
+        ),
       std.stringChars(util.tail(str)),
       self.char(util.head(str))
     ),
