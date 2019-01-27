@@ -84,6 +84,11 @@ local testMany1 = {
     failure: std.assertEqual(util.isFailure(p), true),
   },
   test2: {
+    local p = combinator.many1(char.char('a'))(s('a')),
+    value: std.assertEqual(p.results[0].value, ['a']),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+  test3: {
     local p = combinator.many1(char.char('a'))(s('aaabbb')),
     value: std.assertEqual(p.results[0].value, ['a', 'a', 'a']),
     statePos: std.assertEqual(p.results[0].state.pos, 3),

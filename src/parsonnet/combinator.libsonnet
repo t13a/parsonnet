@@ -98,16 +98,18 @@ local util = import 'util.libsonnet';
   many1(parser)::
     assert std.isFunction(parser) :
            'parser must be an function, got %s' % std.type(parser);
-    function(state)
-      local a = parser(state);
-      local b = self.many(parser)(util.last(a.results).state);
-      if util.isSuccess(a) then
-        local avs = util.outputResultValues(a);
-        local bvs = std.flattenArrays(util.outputResultValues(b));
-        local bs = util.last(b.results).state;
-        model.output.new([model.result.new(avs + bvs, bs)])
-      else
-        model.output.new(),
+    self.bind(
+      parser,
+      function(a)
+        self.bind(
+          self.many(parser),
+          function(b)
+            if util.isConsumed(b) then
+              primitive.result([a.value] + b.value)
+            else
+              primitive.result([a.value])
+        )
+    ),
 
   // plus :: Parser a -> Parser a -> Parser a
   // p 'plus' q = \inp -> (p inp ++ q inp)
