@@ -11,8 +11,13 @@ local util = import 'util.libsonnet';
       util.factory(mapFunc) +
       {
         bind(p, f):: self.__map(combinator.bind(e(p), f)),
+        endBy(p, sep):: self.__map(combinator.endBy(e(p), e(p))),
         many(p):: self.__map(combinator.many(e(p))),
+        many1(p):: self.__map(combinator.many1(e(p))),
+        optional(p):: self.__map(combinator.optional(e(p))),
         plus(p, q):: self.__map(combinator.plus(e(p), e(q))),
+        sepBy(p, sep):: self.__map(combinator.sepBy(e(p), e(p))),
+        sepBy1(p, sep):: self.__map(combinator.sepBy1(e(p), e(p))),
         seq(p, q):: self.__map(combinator.seq(e(p), e(q))),
       },
   },
@@ -23,8 +28,13 @@ local util = import 'util.libsonnet';
       util.builder(initParser) +
       {
         bind(f):: self.__with(combinator.bind(self.parser, f)),
+        endBy(seq):: self.__with(combinator.endBy(self.parser, e(seq))),
         many:: self.__with(combinator.many(self.parser)),
+        many1:: self.__with(combinator.many1(self.parser)),
+        optional:: self.__with(combinator.optional(self.parser)),
         plus(q):: self.__with(combinator.plus(self.parser, e(q))),
+        sepBy(seq):: self.__with(combinator.sepBy(self.parser, e(seq))),
+        sepBy1(seq):: self.__with(combinator.sepBy1(self.parser, e(seq))),
         seq(q):: self.__with(combinator.seq(self.parser, e(q))),
       },
   },

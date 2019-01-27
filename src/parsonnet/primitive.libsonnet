@@ -1,23 +1,25 @@
 local debug = import 'debug.libsonnet';
 local model = import 'model.libsonnet';
+local util = import 'util.libsonnet';
 
 {
   local primitive = self,
   local any(x) = true,
 
   factory:: {
-    new(builder=primitive.builder):: {
-      item:: builder(primitive.item),
-      pure(results=[]):: builder(primitive.pure(results)),
-      result(value=[]):: builder(primitive.result(value)),
-      zero:: builder(primitive.zero),
-    },
+    new(mapFunc=primitive.builder)::
+      local e = util.extract;
+      util.factory(mapFunc) +
+      {
+        item:: self.__map(primitive.item),
+        pure(results=[]):: self.__map(primitive.pure(results)),
+        result(value=[]):: self.__map(primitive.result(value)),
+        zero:: self.__map(primitive.zero),
+      },
   },
 
   builder:: {
-    new(initParser):: {
-      parser:: initParser,
-    },
+    new(initParser):: util.builder(initParser),
   },
 
   // item :: Parser Char

@@ -32,37 +32,38 @@ local util = import 'util.libsonnet';
   },
 
   factory:: {
-    new(builder=primitive.builder):: {
-      anyChar:: builder(char.anyChar),
-      char(c):: builder(char.char(c)),
-      oneOf(chars):: builder(char.oneOf(chars)),
-      noneOf(chars):: builder(char.noneOf(chars)),
-      sat(func):: builder(char.sat(func)),
-      string(str):: builder(char.string(str)),
+    new(mapFunc=primitive.builder)::
+      local e = util.extract;
+      util.factory(mapFunc) +
+      {
+        anyChar:: self.__map(char.anyChar),
+        char(c):: self.__map(char.char(c)),
+        oneOf(chars):: self.__map(char.oneOf(chars)),
+        noneOf(chars):: self.__map(char.noneOf(chars)),
+        sat(func):: self.__map(char.sat(func)),
+        string(str):: self.__map(char.string(str)),
 
-      // POSIX character classes
+        // POSIX character classes
 
-      alnum:: builder(char.alnum),
-      alpha:: builder(char.alpha),
-      ascii:: builder(char.ascii),
-      blank:: builder(char.blank),
-      cntrl:: builder(char.cntrl),
-      digit:: builder(char.digit),
-      graph:: builder(char.graph),
-      lower:: builder(char.lower),
-      print:: builder(char.print),
-      punct:: builder(char.punct),
-      space:: builder(char.space),
-      upper:: builder(char.upper),
-      word:: builder(char.word),
-      xdigit:: builder(char.xdigit),
-    },
+        alnum:: self.__map(char.alnum),
+        alpha:: self.__map(char.alpha),
+        ascii:: self.__map(char.ascii),
+        blank:: self.__map(char.blank),
+        cntrl:: self.__map(char.cntrl),
+        digit:: self.__map(char.digit),
+        graph:: self.__map(char.graph),
+        lower:: self.__map(char.lower),
+        print:: self.__map(char.print),
+        punct:: self.__map(char.punct),
+        space:: self.__map(char.space),
+        upper:: self.__map(char.upper),
+        word:: self.__map(char.word),
+        xdigit:: self.__map(char.xdigit),
+      },
   },
 
   builder:: {
-    new(initParser):: {
-      parser:: initParser,
-    },
+    new(initParser):: util.builder(initParser),
   },
 
   anyChar::
