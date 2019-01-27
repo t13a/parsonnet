@@ -68,6 +68,23 @@ local testOptional = {
   },
 };
 
+local testPlus = {
+  test1: {
+    local p = combinator.plus(char.char('a'), char.char('b'))(s('a')),
+    value: std.assertEqual(p.results[0].value, 'a'),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+  test2: {
+    local p = combinator.plus(char.char('a'), char.char('b'))(s('b')),
+    value: std.assertEqual(p.results[0].value, 'b'),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
+  test3: {
+    local p = combinator.plus(char.char('a'), char.char('b'))(s('c')),
+    failure: std.assertEqual(util.isFailure(p), true),
+  },
+};
+
 local testSepBy1 = {
   test1: {
     local p = combinator.sepBy1(
@@ -119,6 +136,7 @@ local testSeq = {
   testMany: testMany,
   testMany1: testMany1,
   testOptional: testOptional,
+  testPlus: testPlus,
   testSepBy1: testSepBy1,
   testSeq: testSeq,
 }

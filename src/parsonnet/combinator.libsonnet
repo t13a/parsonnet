@@ -100,7 +100,12 @@ local util = import 'util.libsonnet';
     assert std.isFunction(parser2) :
            'parser2 must be an function, got %s' % std.type(parser2);
     function(state)
-      parser1(state) + parser2(state),
+      local a = parser1(state);
+      local b = parser2(state);
+      if util.isSuccess(a) then
+        a
+      else
+        b,
 
   sepBy1(parser, sepParser)::
     assert std.isFunction(parser) :
