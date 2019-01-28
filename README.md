@@ -1,6 +1,6 @@
 # Parsonnet
 
-A parser combinator implemented by [Jsonnet](https://jsonnet.org/). There is **no production quality**. This is my learning project trying to use Jsonnet as a purely functional programming language.
+A parser combinator implemented by [Jsonnet](https://jsonnet.org/). **No production quality**. This is my learning project trying to use Jsonnet as a purely functional programming language.
 
 ## How to try
 
