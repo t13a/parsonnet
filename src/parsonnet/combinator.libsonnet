@@ -11,13 +11,13 @@ local util = import 'util.libsonnet';
       util.factory(mapFunc) +
       {
         bind(p, f):: self.__map(combinator.bind(e(p), function(a) e(f(a)))),
-        endBy(p, sep):: self.__map(combinator.endBy(e(p), e(p))),
+        endBy(p, sep):: self.__map(combinator.endBy(e(p), e(sep))),
         many(p):: self.__map(combinator.many(e(p))),
         many1(p):: self.__map(combinator.many1(e(p))),
         optional(p):: self.__map(combinator.optional(e(p))),
         plus(p, q):: self.__map(combinator.plus(e(p), e(q))),
-        sepBy(p, sep):: self.__map(combinator.sepBy(e(p), e(p))),
-        sepBy1(p, sep):: self.__map(combinator.sepBy1(e(p), e(p))),
+        sepBy(p, sep):: self.__map(combinator.sepBy(e(p), e(sep))),
+        sepBy1(p, sep):: self.__map(combinator.sepBy1(e(p), e(sep))),
         seq(p, q):: self.__map(combinator.seq(e(p), e(q))),
       },
   },
@@ -61,10 +61,6 @@ local util = import 'util.libsonnet';
         model.output.new(),
 
   endBy(parser, sepParser)::
-    assert std.isFunction(parser) :
-           'parser must be an function, got %s' % std.type(parser);
-    assert std.isFunction(sepParser) :
-           'sepParser must be an function, got %s' % std.type(sepParser);
     self.many(
       self.bind(
         parser,
@@ -95,11 +91,14 @@ local util = import 'util.libsonnet';
     local accum(p, s, v=[]) =
       local b = p(s);
       if util.isSuccess(b) then
-        accum(
-          p,
-          util.last(b.results).state,
-          v + std.map(util.resultValue, b.results)
-        ) tailstrict
+        if util.isConsumed(b.results[0]) then
+          accum(
+            p,
+            util.last(b.results).state,
+            v + std.map(util.resultValue, b.results)
+          ) tailstrict
+        else
+          model.result.new(v, util.last(b.results).state)
       else
         model.result.new(v, s);
     function(state)
@@ -157,7 +156,7 @@ local util = import 'util.libsonnet';
           ),
           function(b)
             if util.isConsumed(b) then
-              primitive.result([a.value, std.flattenArrays(b.value)])
+              primitive.result([a.value] + b.value)
             else
               primitive.result([a.value])
         )

@@ -27,7 +27,7 @@ local util = import 'util.libsonnet';
     assert std.isString(msg) :
            'msg must be a string, got %s' % std.type(msg);
     function(state)
-      std.traceIfDebug(msg, model.output.new()),
+      debug.traceIfDebug(state, msg, model.output.new()),
 
   // item :: Parser Char
   // item  = \inp -> case inp of

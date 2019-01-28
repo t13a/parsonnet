@@ -142,6 +142,14 @@ local testSepBy = {
     value: std.assertEqual(p.results[0].value, [['a', 'b', 'c']]),
     statePos: std.assertEqual(p.results[0].state.pos, null),
   },
+  test3: {
+    local p = combinator.sepBy(
+      combinator.many1(char.noneOf(',')),
+      char.char(',')
+    )(s('abc,def')),
+    value: std.assertEqual(p.results[0].value, [['a', 'b', 'c'], ['d', 'e', 'f']]),
+    statePos: std.assertEqual(p.results[0].state.pos, null),
+  },
 };
 
 local testSepBy1 = {
