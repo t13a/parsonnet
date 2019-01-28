@@ -77,12 +77,12 @@ local util = import 'util.libsonnet';
   oneOf(chars)::
     assert std.isString(chars) : 'chars must be a string, got %s' % std.type(chars);
     assert std.length(chars) > 0 : 'chars length must be greater than 0, got %d' % std.length(chars);
-    self.sat(function(item) std.setMember(item, std.stringChars(chars))),
+    self.sat(function(item) std.setMember(item, std.sort(std.stringChars(chars)))),
 
   noneOf(chars)::
     assert std.isString(chars) : 'chars must be a string, got %s' % std.type(chars);
     assert std.length(chars) > 0 : 'chars length must be greater than 0, got %d' % std.length(chars);
-    self.sat(function(item) !std.setMember(item, std.stringChars(chars))),
+    self.sat(function(item) !std.setMember(item, std.sort(std.stringChars(chars)))),
 
   sat(func)::
     assert std.isFunction(func) : 'func must be a function, got %s' % std.type(func);

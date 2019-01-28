@@ -21,10 +21,10 @@ local testChar = {
 local testNoneOf = {
   test1:
     local p = char.noneOf('abc')(s('b'));
-    std.assertEqual(p.results[0].value, 'b'),
+    std.assertEqual(util.isFailure(p), true),
   test2:
     local p = char.noneOf('abc')(s('e'));
-    std.assertEqual(util.isFailure(p), true),
+    std.assertEqual(p.results[0].value, 'e'),
 };
 
 local testString = {
@@ -39,5 +39,6 @@ local testString = {
 {
   testAnyChar: testAnyChar,
   testChar: testChar,
+  testNoneOf: testNoneOf,
   testString: testString,
 }
